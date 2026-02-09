@@ -29,6 +29,7 @@ CREATE TABLE `agendamentos` (
   `profissional_id` int(11) NOT NULL,
   `servico_id` int(11) NOT NULL,
   `data_hora` datetime NOT NULL,
+  'duracao_minutos' int NOT NULL DEFAULT 60,
   `status` enum('agendado','cancelado','finalizado') DEFAULT 'agendado',
   `criado_em` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),

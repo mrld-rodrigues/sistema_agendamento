@@ -1,4 +1,8 @@
 from flask import Blueprint, request, jsonify
+from dao.work_time_dao import HorariosTrabalhoDAO
+from dao.blocked_dao import BloqueiosDAO
+from dao.scheduling_dao import AgendamentoDAO
+from services.horarios_livres_services import calcular_horarios_livres
 from dao.scheduling_dao import AgendamentoDAO
 from dao.service_dao import ServicoDAO
 from datetime import datetime, timedelta
@@ -157,3 +161,41 @@ def calendario_completo():
     )
 
     return jsonify(calendario), 200
+
+
+@agendamentos_bp.route("/horarios-livres", methods=["GET"])
+def listar_horarios_livres():
+    profissional_id = request.args.get("profissional_id")
+    data_str = request.args.get("data")
+
+    if not profissional_id or not data_str:
+        return jsonify({"erro": "Informe profissional_id e data"}), 400
+
+    data = datetime.strptime(data_str, "%Y-%m-%d").date()
+    dia_semana = data.weekday()
+
+    jornada = HorariosTrabalhoDAO.buscar_por_profissional_e_dia(
+        profissional_id, dia_semana
+    )
+
+    agendamentos = AgendamentoDAO.agendamentos_do_dia(
+        profissional_id, data
+    )
+
+    bloqueios = BloqueiosDAO.bloqueios_do_dia(
+        profissional_id, data
+    )
+
+    livres = calcular_horarios_livres(
+        jornada, agendamentos, bloqueios, data
+    )
+
+    resposta = [
+        {
+            "inicio": l[0].strftime("%H:%M"),
+            "fim": l[1].strftime("%H:%M")
+        }
+        for l in livres
+    ]
+
+    return jsonify(resposta), 200

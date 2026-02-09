@@ -169,6 +169,7 @@ class AgendamentoDAO:
 
     @staticmethod
     def calendario_completo(profissional_id, ano, mes):
+        
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
@@ -209,6 +210,27 @@ class AgendamentoDAO:
             query,
             (ano, mes, profissional_id, profissional_id, mes)
         )
+
+        dados = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return dados
+  
+  
+    @staticmethod
+    def agendamentos_do_dia(profissional_id, data):
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT data_hora, duracao_minutos
+            FROM agendamentos
+            WHERE profissional_id = %s
+            AND DATE(data_hora) = %s
+            ORDER BY data_hora
+        """, (profissional_id, data))
 
         dados = cursor.fetchall()
 
