@@ -1,145 +1,136 @@
-/*M!999999\- enable the sandbox mode */ 
--- MariaDB dump 10.19  Distrib 10.11.11-MariaDB, for debian-linux-gnu (x86_64)
---
--- Host: localhost    Database: sistema_agendamento
--- ------------------------------------------------------
--- Server version	10.11.11-MariaDB-0+deb12u1
+SET FOREIGN_KEY_CHECKS=0;
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+DROP TABLE IF EXISTS horarios_bloqueados;
+DROP TABLE IF EXISTS horarios_trabalho;
+DROP TABLE IF EXISTS agendamentos;
+DROP TABLE IF EXISTS servicos;
+DROP TABLE IF EXISTS clientes;
+DROP TABLE IF EXISTS profissionais;
 
---
--- Table structure for table `agendamentos`
---
+SET FOREIGN_KEY_CHECKS=1;
 
-DROP TABLE IF EXISTS `agendamentos`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `agendamentos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `cliente_id` int(11) NOT NULL,
-  `profissional_id` int(11) NOT NULL,
-  `servico_id` int(11) NOT NULL,
-  `data_hora` datetime NOT NULL,
-  'duracao_minutos' int NOT NULL DEFAULT 60,
-  `status` enum('agendado','cancelado','finalizado') DEFAULT 'agendado',
-  `criado_em` timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `cliente_id` (`cliente_id`),
-  KEY `profissional_id` (`profissional_id`),
-  KEY `servico_id` (`servico_id`),
-  CONSTRAINT `agendamentos_ibfk_1` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`),
-  CONSTRAINT `agendamentos_ibfk_2` FOREIGN KEY (`profissional_id`) REFERENCES `profissionais` (`id`),
-  CONSTRAINT `agendamentos_ibfk_3` FOREIGN KEY (`servico_id`) REFERENCES `servicos` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- =========================
+-- PROFISSIONAIS
+-- =========================
+CREATE TABLE profissionais (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    profissao VARCHAR(100) NOT NULL
+);
 
---
--- Dumping data for table `agendamentos`
---
+INSERT INTO profissionais (nome, profissao)
+VALUES ('João Chef', 'Cozinheiro');
 
-LOCK TABLES `agendamentos` WRITE;
-/*!40000 ALTER TABLE `agendamentos` DISABLE KEYS */;
-/*!40000 ALTER TABLE `agendamentos` ENABLE KEYS */;
-UNLOCK TABLES;
+-- =========================
+-- CLIENTES
+-- =========================
+CREATE TABLE clientes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    telefone VARCHAR(20)
+);
 
---
--- Table structure for table `clientes`
---
+-- 15 clientes exemplo
+INSERT INTO clientes (nome,email,telefone) VALUES
+('Cliente 1','c1@email.com','111'),
+('Cliente 2','c2@email.com','222'),
+('Cliente 3','c3@email.com','333'),
+('Cliente 4','c4@email.com','444'),
+('Cliente 5','c5@email.com','555'),
+('Cliente 6','c6@email.com','666'),
+('Cliente 7','c7@email.com','777'),
+('Cliente 8','c8@email.com','888'),
+('Cliente 9','c9@email.com','999'),
+('Cliente 10','c10@email.com','1010'),
+('Cliente 11','c11@email.com','1111'),
+('Cliente 12','c12@email.com','1212'),
+('Cliente 13','c13@email.com','1313'),
+('Cliente 14','c14@email.com','1414'),
+('Cliente 15','c15@email.com','1515');
 
-DROP TABLE IF EXISTS `clientes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `clientes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `nome` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `telefone` varchar(20) DEFAULT NULL,
-  `criado_em` timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- =========================
+-- SERVIÇOS
+-- =========================
+CREATE TABLE servicos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    duracao_minutos INT NOT NULL,
+    preco DECIMAL(10,2) NOT NULL
+);
 
---
--- Dumping data for table `clientes`
---
+INSERT INTO servicos (nome,duracao_minutos,preco)
+VALUES ('Jantar Particular',240,1700.00);
 
-LOCK TABLES `clientes` WRITE;
-/*!40000 ALTER TABLE `clientes` DISABLE KEYS */;
-/*!40000 ALTER TABLE `clientes` ENABLE KEYS */;
-UNLOCK TABLES;
+-- =========================
+-- AGENDAMENTOS
+-- =========================
+CREATE TABLE agendamentos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    profissional_id INT NOT NULL,
+    cliente_id INT NOT NULL,
+    servico_id INT NOT NULL,
+    data_hora DATETIME NOT NULL,
+    duracao_minutos INT NOT NULL,
 
---
--- Table structure for table `profissionais`
---
+    FOREIGN KEY (profissional_id) REFERENCES profissionais(id),
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    FOREIGN KEY (servico_id) REFERENCES servicos(id)
+);
 
-DROP TABLE IF EXISTS `profissionais`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `profissionais` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `nome` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `telefone` varchar(20) DEFAULT NULL,
-  `especialidade` varchar(50) DEFAULT NULL,
-  `criado_em` timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Alguns agendamentos exemplo
+INSERT INTO agendamentos 
+(profissional_id, cliente_id, servico_id, data_hora, duracao_minutos)
+VALUES
+(1,1,1,'2026-02-01 18:00:00',240),
+(1,2,1,'2026-02-02 19:00:00',240),
+(1,3,1,'2026-02-03 20:00:00',240),
+(1,4,1,'2026-02-04 18:00:00',240),
+(1,5,1,'2026-02-05 18:00:00',240);
 
---
--- Dumping data for table `profissionais`
---
+-- =========================
+-- HORÁRIOS DE TRABALHO
+-- =========================
+CREATE TABLE horarios_trabalho (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    profissional_id INT NOT NULL,
+    dia_semana TINYINT NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fim TIME NOT NULL,
 
-LOCK TABLES `profissionais` WRITE;
-/*!40000 ALTER TABLE `profissionais` DISABLE KEYS */;
-/*!40000 ALTER TABLE `profissionais` ENABLE KEYS */;
-UNLOCK TABLES;
+    FOREIGN KEY (profissional_id) REFERENCES profissionais(id)
+);
 
---
--- Table structure for table `servicos`
---
+-- Cozinheiro trabalha todos os dias 18h às 00h
+INSERT INTO horarios_trabalho 
+(profissional_id,dia_semana,hora_inicio,hora_fim)
+VALUES
+(1,0,'18:00','00:00'),
+(1,1,'18:00','00:00'),
+(1,2,'18:00','00:00'),
+(1,3,'18:00','00:00'),
+(1,4,'18:00','00:00'),
+(1,5,'18:00','00:00'),
+(1,6,'18:00','00:00');
 
-DROP TABLE IF EXISTS `servicos`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `servicos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `nome` varchar(100) NOT NULL,
-  `descricao` text DEFAULT NULL,
-  `duracao_minutos` int(11) NOT NULL,
-  `preco` decimal(10,2) DEFAULT NULL,
-  `criado_em` timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- =========================
+-- BLOQUEIOS POR HORÁRIO
+-- =========================
+CREATE TABLE horarios_bloqueados (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    profissional_id INT NOT NULL,
+    data DATE NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fim TIME NOT NULL,
+    motivo VARCHAR(255),
 
---
--- Dumping data for table `servicos`
---
+    FOREIGN KEY (profissional_id) REFERENCES profissionais(id)
+);
 
-LOCK TABLES `servicos` WRITE;
-/*!40000 ALTER TABLE `servicos` DISABLE KEYS */;
-/*!40000 ALTER TABLE `servicos` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+-- Exemplo de bloqueio
+INSERT INTO horarios_bloqueados
+(profissional_id,data,hora_inicio,hora_fim,motivo)
+VALUES
+(1,'2026-02-06','22:00','23:30','Descanso');
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-29 12:29:15

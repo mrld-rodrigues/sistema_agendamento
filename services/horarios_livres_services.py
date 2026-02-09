@@ -1,4 +1,18 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
+
+
+def time_from_db(valor):
+    """
+    Converte TIME do MariaDB que pode vir como timedelta
+    para datetime.time (padrão do Python)
+    """
+    if isinstance(valor, timedelta):
+        total = int(valor.total_seconds())
+        horas = total // 3600
+        minutos = (total % 3600) // 60
+        return time(horas, minutos)
+
+    return valor
 
 
 def subtrair_intervalos(base_inicio, base_fim, ocupados):
@@ -31,8 +45,12 @@ def calcular_horarios_livres(jornada, agendamentos, bloqueios, data):
         ocupados.append((ini, fim))
 
     for b in bloqueios:
-        ini = datetime.combine(data, b["hora_inicio"])
-        fim = datetime.combine(data, b["hora_fim"])
+        hora_ini = time_from_db(b["hora_inicio"])
+        hora_fim = time_from_db(b["hora_fim"])
+
+        ini = datetime.combine(data, hora_ini)
+        fim = datetime.combine(data, hora_fim)
+
         ocupados.append((ini, fim))
 
     ocupados.sort()
@@ -40,8 +58,11 @@ def calcular_horarios_livres(jornada, agendamentos, bloqueios, data):
     livres_total = []
 
     for j in jornada:
-        base_ini = datetime.combine(data, j["hora_inicio"])
-        base_fim = datetime.combine(data, j["hora_fim"])
+        hora_ini = time_from_db(j["hora_inicio"])
+        hora_fim = time_from_db(j["hora_fim"])
+
+        base_ini = datetime.combine(data, hora_ini)
+        base_fim = datetime.combine(data, hora_fim)
 
         livres = subtrair_intervalos(base_ini, base_fim, ocupados)
         livres_total.extend(livres)
