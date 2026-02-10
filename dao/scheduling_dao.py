@@ -238,3 +238,44 @@ class AgendamentoDAO:
         conn.close()
 
         return dados
+
+
+    @staticmethod
+    def listar(data=None, profissional_id=None):
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT 
+                a.id,
+                a.data_hora,
+                c.nome AS cliente,
+                p.nome AS profissional,
+                s.nome AS servico,
+                s.duracao_minutos
+            FROM agendamentos a
+            JOIN clientes c ON c.id = a.cliente_id
+            JOIN profissionais p ON p.id = a.profissional_id
+            JOIN servicos s ON s.id = a.servico_id
+            WHERE 1=1
+        """
+
+        params = []
+
+        if data:
+            query += " AND DATE(a.data_hora) = %s"
+            params.append(data)
+
+        if profissional_id:
+            query += " AND a.profissional_id = %s"
+            params.append(profissional_id)
+
+        query += " ORDER BY a.data_hora"
+
+        cursor.execute(query, params)
+        resultados = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return resultados

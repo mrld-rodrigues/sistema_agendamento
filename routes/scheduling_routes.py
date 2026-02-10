@@ -13,9 +13,16 @@ agendamentos_bp = Blueprint("agendamentos", __name__)
 def criar_agendamento():
     data = request.json
 
-    data_hora = datetime.strptime(
-        data["data_hora"], "%Y-%m-%d %H:%M:%S"
-    )
+    try:
+        data_hora = datetime.fromisoformat(data["data_hora"])
+    except ValueError:
+        data_hora = datetime.strptime(
+            data["data_hora"], "%Y-%m-%d %H:%M:%S"
+        )
+
+    # data_hora = datetime.strptime(
+    #     data["data_hora"], "%Y-%m-%d %H:%M:%S"
+    # )
 
     servico = ServicoDAO.buscar_por_id(data["servico_id"])
 
