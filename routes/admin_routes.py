@@ -50,3 +50,15 @@ def agenda_profissional():
     )
 
     return jsonify(agendamentos)
+
+
+@admin_bp.route("/agendamentos/<int:agendamento_id>", methods=["DELETE"])
+def deletar_agendamento(agendamento_id):
+
+    sucesso = AgendamentoDAO.deletar(agendamento_id)
+
+    if not sucesso:
+        return jsonify({"erro": "Agendamento não encontrado"}), 404
+
+    return jsonify({"mensagem": "Agendamento deletado com sucesso"})
+

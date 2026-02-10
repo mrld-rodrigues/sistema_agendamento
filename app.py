@@ -16,4 +16,4 @@ app.register_blueprint(agendamentos_bp, url_prefix="/agendamentos")
 app.register_blueprint(admin_bp, url_prefix="/admin")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)

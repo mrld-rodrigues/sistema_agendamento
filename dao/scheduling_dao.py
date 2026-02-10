@@ -279,3 +279,81 @@ class AgendamentoDAO:
         conn.close()
 
         return resultados
+
+
+    @staticmethod
+    def remarcar(agendamento_id, nova_data_hora):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Verificar se o agendamento existe
+        cursor.execute(
+            "SELECT profissional_id, servico_id FROM agendamentos WHERE id = %s",
+            (agendamento_id,)
+        )
+        agendamento = cursor.fetchone()
+
+        if not agendamento:
+            cursor.close()
+            conn.close()
+            return False
+
+        profissional_id, servico_id = agendamento
+
+        # Verificar se há conflito com o novo horário
+        cursor.execute(
+            "SELECT duracao_minutos FROM servicos WHERE id = %s",
+            (servico_id,)
+        )
+        duracao_minutos = cursor.fetchone()[0]
+
+        data_hora_fim = nova_data_hora + timedelta(minutes=duracao_minutos)
+
+        cursor.execute("""
+            SELECT id
+            FROM agendamentos
+            WHERE profissional_id = %s
+              AND id != %s
+              AND (
+                data_hora < %s
+                AND DATE_ADD(data_hora, INTERVAL %s MINUTE) > %s
+              )
+        """, (profissional_id, agendamento_id, data_hora_fim, duracao_minutos, nova_data_hora))
+
+        conflito = cursor.fetchone()
+
+        if conflito:
+            cursor.close()
+            conn.close()
+            return False
+
+        # Atualizar a data e hora do agendamento
+        cursor.execute(
+            "UPDATE agendamentos SET data_hora = %s WHERE id = %s",
+            (nova_data_hora, agendamento_id)
+        )
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return True
+    
+
+    @staticmethod
+    def deletar(agendamento_id):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "DELETE FROM agendamentos WHERE id = %s",
+            (agendamento_id,)
+        )
+
+        afetados = cursor.rowcount
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return afetados > 0
