@@ -1,9 +1,8 @@
 from flask import Blueprint, request, jsonify
 from dao.work_time_dao import HorariosTrabalhoDAO
-from dao.blocked_dao import BloqueiosDAO
+from dao.blocked_dao import BloqueioDAO
 from dao.scheduling_dao import AgendamentoDAO
 from services.horarios_livres_services import calcular_horarios_livres
-from dao.scheduling_dao import AgendamentoDAO
 from dao.service_dao import ServicoDAO
 from datetime import datetime, timedelta
 
@@ -189,7 +188,7 @@ def listar_horarios_livres():
         profissional_id, data
     )
 
-    bloqueios = BloqueiosDAO.bloqueios_do_dia(
+    bloqueios = BloqueioDAO.bloqueios_do_dia(
         profissional_id, data
     )
 

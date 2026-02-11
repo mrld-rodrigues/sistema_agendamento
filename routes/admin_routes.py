@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
 from dao.scheduling_dao import AgendamentoDAO
+from dao.blocked_dao import BloqueioDAO
+
 from datetime import datetime
 
 admin_bp = Blueprint("admin", __name__)
@@ -16,7 +18,6 @@ def listar_agendamentos():
     )
 
     return jsonify(agendamentos)
-
 
 
 @admin_bp.route("/agendamentos/<int:id>/remarcar", methods=["PUT"])
@@ -62,3 +63,52 @@ def deletar_agendamento(agendamento_id):
 
     return jsonify({"mensagem": "Agendamento deletado com sucesso"})
 
+
+@admin_bp.route("/bloquear-dia", methods=["POST"])
+def bloquear_dia():
+
+    data = request.json
+
+    BloqueioDAO.bloquear_dia(
+        data["profissional_id"],
+        data["data"],
+        data.get("motivo")
+    )
+
+    return jsonify({"mensagem": "Dia bloqueado com sucesso"})
+
+
+@admin_bp.route("/bloquear-horario", methods=["POST"])
+def bloquear_horario():
+
+    data = request.json
+
+    BloqueioDAO.bloquear_horario(
+        data["profissional_id"],
+        data["data"],
+        data["hora_inicio"],
+        data["hora_fim"],
+        data.get("motivo")
+    )
+
+    return jsonify({"mensagem": "Horário bloqueado com sucesso"})
+
+
+@admin_bp.route("/bloquear-periodo", methods=["POST"])
+def bloquear_periodo():
+
+    data = request.json
+
+    BloqueioDAO.bloquear_periodo(
+        data["profissional_id"],
+        data["data_inicio"],
+        data["data_fim"],
+        data.get("motivo")
+    )
+
+    return jsonify({"mensagem": "Período bloqueado com sucesso"})
+
+
+
+
+    
