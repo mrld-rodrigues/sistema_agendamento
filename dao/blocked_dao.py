@@ -1,5 +1,16 @@
 from database.connection import get_connection
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
+
+
+
+def formatar_timedelta(td):
+    if td is None:
+        return None
+    total_segundos = int(td.total_seconds())
+    horas = total_segundos // 3600
+    minutos = (total_segundos % 3600) // 60
+    segundos = total_segundos % 60
+    return f"{horas:02d}:{minutos:02d}:{segundos:02d}"
 
 
 class BloqueioDAO:
@@ -81,28 +92,68 @@ class BloqueioDAO:
         cursor.close()
         conn.close()
 
-
+    
     @staticmethod
-    def bloqueios_do_dia(profissional_id, data):
+    def bloqueios_do_dia(profissional_id, data=None):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("""
-            SELECT 
-                data,
-                hora_inicio,
-                hora_fim
-            FROM bloqueios
+        # Pega apenas os horários bloqueados
+        query = """
+            SELECT id, data, hora_inicio, hora_fim, motivo
+            FROM horarios_bloqueados
             WHERE profissional_id = %s
-              AND data = %s
-        """, (profissional_id, data))
+        """
+        params = [profissional_id]
+        if data:
+            query += " AND data = %s"
+            params.append(data)
 
-        bloqueios = cursor.fetchall()
+        cursor.execute(query, params)
+        registros = cursor.fetchall()
 
         cursor.close()
         conn.close()
 
+        # Converte para JSON-friendly
+        bloqueios = [
+            {
+                'id': r['id'],
+                'data': r['data'].isoformat() if isinstance(r['data'], (date, datetime)) else r['data'],
+                'hora_inicio': formatar_timedelta(r['hora_inicio']),
+                'hora_fim': formatar_timedelta(r['hora_fim']),
+                'motivo': r['motivo']
+            }
+            for r in registros
+        ]
+
         return bloqueios
+
+
+
+
+
+    # def bloqueios_do_dia(profissional_id, data):
+    #     conn = get_connection()
+    #     cursor = conn.cursor(dictionary=True)
+
+       
+    #     cursor.execute("""
+    #         SELECT TIME(hora_inicio) AS hora_inicio,
+    #                TIME(hora_fim) AS hora_fim, motivo
+    #         FROM horarios_bloqueados
+    #         WHERE profissional_id = %s AND data = %s
+    #         ORDER BY hora_inicio
+    #     """, (profissional_id, data))
+
+    #     horarios = cursor.fetchall()
+
+    #     cursor.close()
+    #     conn.close()
+
+    #     return horarios
+
+
     
 
     @staticmethod
@@ -112,7 +163,7 @@ class BloqueioDAO:
 
         query = """
             SELECT *
-            FROM bloqueios
+            FROM dias_bloqueados
             WHERE profissional_id = %s
         """
 

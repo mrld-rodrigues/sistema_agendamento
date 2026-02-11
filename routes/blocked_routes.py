@@ -50,7 +50,7 @@ def bloquear_periodo():
     return jsonify({"mensagem": "Período bloqueado com sucesso"})
 
 
-@bloqueios_bp.route("/bloqueios", methods=["GET"])
+@bloqueios_bp.route("bloqueios", methods=["GET"])
 def listar_bloqueios():
     profissional_id = request.args.get("profissional_id", type=int)
     data = request.args.get("data")
@@ -63,7 +63,17 @@ def listar_bloqueios():
     return jsonify(dados)
 
 
-@bloqueios_bp.route("/bloqueios/<int:bloqueio_id>", methods=["DELETE"])
+@bloqueios_bp.route("/dia", methods=["GET"])
+def bloqueios_do_dia():
+    profissional_id = request.args.get("profissional_id", type=int)
+    data = request.args.get("data")
+
+    dados = BloqueioDAO.bloqueios_do_dia(profissional_id, data)
+
+    return jsonify(dados)
+
+
+@bloqueios_bp.route("/<int:bloqueio_id>", methods=["DELETE"])
 def deletar_bloqueio(bloqueio_id):
     sucesso = BloqueioDAO.apagar_bloqueios(bloqueio_id)
 
