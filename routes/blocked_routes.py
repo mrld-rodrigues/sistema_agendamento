@@ -50,15 +50,28 @@ def bloquear_periodo():
     return jsonify({"mensagem": "Período bloqueado com sucesso"})
 
 
-@bloqueios_bp.route("bloqueios", methods=["GET"])
-def listar_bloqueios():
+@bloqueios_bp.route("/todos", methods=["GET"])
+def listar_todos_bloqueios():
     profissional_id = request.args.get("profissional_id", type=int)
     data = request.args.get("data")
 
     if not profissional_id:
         return jsonify({"erro": "profissional_id obrigatório"}), 400
 
-    dados = BloqueioDAO.listar_bloqueios(profissional_id, data)
+    dados = BloqueioDAO.listar_todos_bloqueios(profissional_id, data)
+
+    return jsonify(dados)
+
+
+@bloqueios_bp.route("/dias-bloqueados", methods=["GET"])
+def dias_bloqueados():
+    profissional_id = request.args.get("profissional_id", type=int)
+    data = request.args.get("data")
+
+    if not profissional_id:
+        return jsonify({"erro": "profissional_id obrigatório"}), 400
+
+    dados = BloqueioDAO.dias_bloqueados(profissional_id, data)
 
     return jsonify(dados)
 
@@ -73,9 +86,19 @@ def bloqueios_do_dia():
     return jsonify(dados)
 
 
-@bloqueios_bp.route("/<int:bloqueio_id>", methods=["DELETE"])
-def deletar_bloqueio(bloqueio_id):
-    sucesso = BloqueioDAO.apagar_bloqueios(bloqueio_id)
+@bloqueios_bp.route("/apagar-dia/<int:bloqueio_id>", methods=["DELETE"])
+def apagar_bloqueios_dia(bloqueio_id):
+    sucesso = BloqueioDAO.apagar_bloqueios_dia(bloqueio_id)
+
+    if not sucesso:
+        return jsonify({"erro": "Bloqueio não encontrado"}), 404
+
+    return jsonify({"mensagem": "Bloqueio removido"})
+
+
+@bloqueios_bp.route("/apagar-horario/<int:bloqueio_id>", methods=["DELETE"])
+def apagar_bloqueios_horario(bloqueio_id):
+    sucesso = BloqueioDAO.apagar_bloqueios_horario(bloqueio_id)
 
     if not sucesso:
         return jsonify({"erro": "Bloqueio não encontrado"}), 404

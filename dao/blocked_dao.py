@@ -130,39 +130,53 @@ class BloqueioDAO:
         return bloqueios
 
 
-
-
-
-    # def bloqueios_do_dia(profissional_id, data):
-    #     conn = get_connection()
-    #     cursor = conn.cursor(dictionary=True)
-
-       
-    #     cursor.execute("""
-    #         SELECT TIME(hora_inicio) AS hora_inicio,
-    #                TIME(hora_fim) AS hora_fim, motivo
-    #         FROM horarios_bloqueados
-    #         WHERE profissional_id = %s AND data = %s
-    #         ORDER BY hora_inicio
-    #     """, (profissional_id, data))
-
-    #     horarios = cursor.fetchall()
-
-    #     cursor.close()
-    #     conn.close()
-
-    #     return horarios
-
-
-    
-
     @staticmethod
-    def listar_bloqueios(profissional_id, data=None):
+    def dias_bloqueados(profissional_id, data=None):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
         query = """
-            SELECT *
+            SELECT id, data, motivo
+            FROM dias_bloqueados
+            WHERE profissional_id = %s
+        """
+        params = [profissional_id]
+        if data:
+            query += " AND data = %s"
+            params.append(data)
+
+        cursor.execute(query, params)
+        registros = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        bloqueios = [
+            {
+                'id': r['id'],
+                'data': r['data'].isoformat() if isinstance(r['data'], (date, datetime)) else r['data'],
+                'motivo': r['motivo']
+            }
+            for r in registros
+        ]
+
+        return bloqueios
+    
+
+    @staticmethod
+    def listar_todos_bloqueios(profissional_id, data=None):
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT 
+                id,
+                profissional_id,
+                data,
+                NULL AS hora_inicio,
+                NULL AS hora_fim,
+                motivo,
+                'dia' AS tipo
             FROM dias_bloqueados
             WHERE profissional_id = %s
         """
@@ -173,21 +187,77 @@ class BloqueioDAO:
             query += " AND data = %s"
             params.append(data)
 
+        query += """
+
+            UNION ALL
+
+            SELECT
+                id,
+                profissional_id,
+                data,
+                hora_inicio,
+                hora_fim,
+                motivo,
+                'horario' AS tipo
+            FROM horarios_bloqueados
+            WHERE profissional_id = %s
+        """
+
+        params.append(profissional_id)
+
+        if data:
+            query += " AND data = %s"
+            params.append(data)
+
+        query += " ORDER BY data, hora_inicio"
+
         cursor.execute(query, params)
         dados = cursor.fetchall()
+
+        for item in dados:
+            if isinstance(item["hora_inicio"], timedelta):
+                total_seconds = int(item["hora_inicio"].total_seconds())
+                horas = total_seconds // 3600
+                minutos = (total_seconds % 3600) // 60
+                item["hora_inicio"] = f"{horas:02d}:{minutos:02d}"
+
+            if isinstance(item["hora_fim"], timedelta):
+                total_seconds = int(item["hora_fim"].total_seconds())
+                horas = total_seconds // 3600
+                minutos = (total_seconds % 3600) // 60
+                item["hora_fim"] = f"{horas:02d}:{minutos:02d}"
 
         cursor.close()
         conn.close()
 
         return dados
 
+
     @staticmethod
-    def apagar_bloqueios(bloqueio_id):
+    def apagar_bloqueios_dia(bloqueio_id):
         conn = get_connection()
         cursor = conn.cursor()
 
         cursor.execute(
-            "DELETE FROM bloqueios WHERE id = %s",
+            "DELETE FROM dias_bloqueados WHERE id = %s",
+            (bloqueio_id,)
+        )
+
+        conn.commit()
+        afetados = cursor.rowcount
+
+        cursor.close()
+        conn.close()
+
+        return afetados > 0
+    
+    @staticmethod
+    def apagar_bloqueios_horario(bloqueio_id):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "DELETE FROM horarios_bloqueados WHERE id = %s",
             (bloqueio_id,)
         )
 
