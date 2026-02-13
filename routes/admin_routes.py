@@ -144,4 +144,12 @@ def apagar_bloqueio_horario_admin(bloqueio_id):
     return jsonify({"mensagem": "Bloqueio removido com sucesso"})
 
 
-    
+@admin_bp.route("/bloqueios/periodo/<int:bloqueio_id>", methods=["DELETE"])
+def apagar_bloqueio_periodo_admin(bloqueio_id):
+
+    sucesso = BloqueioDAO.apagar_bloqueios_periodo(bloqueio_id)
+
+    if not sucesso:
+        return jsonify({"erro": "Bloqueio não encontrado"}), 404
+
+    return jsonify({"mensagem": "Bloqueio removido com sucesso"})    
