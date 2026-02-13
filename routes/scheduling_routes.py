@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from dao.work_time_dao import HorariosTrabalhoDAO
+from dao.worktime_dao import HorariosTrabalhoDAO
 from dao.blocked_dao import BloqueioDAO
 from dao.scheduling_dao import AgendamentoDAO
 from services.horarios_livres_services import calcular_horarios_livres
