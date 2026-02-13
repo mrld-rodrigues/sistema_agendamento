@@ -1,5 +1,5 @@
 from database.connection import get_connection
-from datetime import timedelta, datetime
+from datetime import timedelta
 
 
 class AgendamentoDAO:
@@ -30,35 +30,23 @@ class AgendamentoDAO:
     
 
     @staticmethod
-    def verificar_conflito(profissional_id, data_hora_inicio, duracao_minutos):
+    def buscar_por_id(agendamento_id):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-
-        data_hora_fim = data_hora_inicio + timedelta(minutes=duracao_minutos)
-
         query = """
-            SELECT a.id
+            SELECT a.*, s.duracao_minutos, s.nome as servico_nome, c.nome as cliente_nome, p.nome as profissional_nome
             FROM agendamentos a
             JOIN servicos s ON s.id = a.servico_id
-            WHERE a.profissional_id = %s
-              AND (
-                a.data_hora < %s
-                AND DATE_ADD(a.data_hora, INTERVAL s.duracao_minutos MINUTE) > %s
-              )
+            JOIN clientes c ON c.id = a.cliente_id
+            JOIN profissionais p ON p.id = a.profissional_id
+            WHERE a.id = %s
         """
-
-        cursor.execute(
-            query,
-            (profissional_id, data_hora_fim, data_hora_inicio)
-        )
-
-        conflito = cursor.fetchone()
-
+        cursor.execute(query, (agendamento_id,))
+        result = cursor.fetchone()
         cursor.close()
         conn.close()
+        return result
 
-        return conflito is not None    
-    
 
     @staticmethod
     def listar_por_profissional_e_data(profissional_id, data):
@@ -216,28 +204,7 @@ class AgendamentoDAO:
         cursor.close()
         conn.close()
 
-        return dados
-  
-  
-    @staticmethod
-    def agendamentos_do_dia(profissional_id, data):
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        cursor.execute("""
-            SELECT data_hora, duracao_minutos
-            FROM agendamentos
-            WHERE profissional_id = %s
-            AND DATE(data_hora) = %s
-            ORDER BY data_hora
-        """, (profissional_id, data))
-
-        dados = cursor.fetchall()
-
-        cursor.close()
-        conn.close()
-
-        return dados
+        return dados    
 
 
     @staticmethod
@@ -357,3 +324,65 @@ class AgendamentoDAO:
         conn.close()
 
         return afetados > 0
+    
+
+    @staticmethod
+    def verificar_conflito(profissional_id, inicio_intervalo, fim_intervalo, ignorar_agendamento_id=None):
+        """
+        Verifica se há agendamento conflitando com [inicio_intervalo, fim_intervalo).
+        Retorna True se houver conflito.
+        """
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT a.id
+            FROM agendamentos a
+            JOIN servicos s ON a.servico_id = s.id
+            WHERE a.profissional_id = %s
+            AND a.data_hora < %s
+            AND DATE_ADD(a.data_hora, INTERVAL s.duracao_minutos MINUTE) > %s
+        """
+        params = [profissional_id, fim_intervalo, inicio_intervalo]
+
+        if ignorar_agendamento_id:
+            query += " AND a.id != %s"
+            params.append(ignorar_agendamento_id)
+
+        cursor.execute(query, params)
+        conflito = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return conflito is not None
+    
+
+    @staticmethod
+    def verificar_conflito_agendamentos(profissional_id, data_hora_inicio, duracao_minutos, ignorar_agendamento_id=None):
+        """
+        Verifica se há conflito com outros agendamentos do mesmo profissional.
+        Retorna True se houver conflito.
+        """
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        data_hora_fim = data_hora_inicio + timedelta(minutes=duracao_minutos)
+
+        query = """
+            SELECT a.id
+            FROM agendamentos a
+            JOIN servicos s ON s.id = a.servico_id
+            WHERE a.profissional_id = %s
+            AND a.data_hora < %s
+            AND DATE_ADD(a.data_hora, INTERVAL s.duracao_minutos MINUTE) > %s
+        """
+        params = [profissional_id, data_hora_fim, data_hora_inicio]
+
+        if ignorar_agendamento_id:
+            query += " AND a.id != %s"
+            params.append(ignorar_agendamento_id)
+
+        cursor.execute(query, params)
+        conflito = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return conflito is not None

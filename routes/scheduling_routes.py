@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from dao.worktime_dao import HorariosTrabalhoDAO
 from dao.blocked_dao import BloqueioDAO
 from dao.scheduling_dao import AgendamentoDAO
-from services.horarios_livres_services import calcular_horarios_livres
+from services.horarios_livres_services import HorariosLivresService
 from dao.service_dao import ServicoDAO
 from datetime import datetime, timedelta
 
@@ -11,41 +11,16 @@ agendamentos_bp = Blueprint("agendamentos", __name__)
 @agendamentos_bp.route("", methods=["POST"])
 def criar_agendamento():
     data = request.json
+    # ... converter data_hora, buscar serviço ...
 
-    try:
-        data_hora = datetime.fromisoformat(data["data_hora"])
-    except ValueError:
-        data_hora = datetime.strptime(
-            data["data_hora"], "%Y-%m-%d %H:%M:%S"
-        )
-
-    # data_hora = datetime.strptime(
-    #     data["data_hora"], "%Y-%m-%d %H:%M:%S"
-    # )
-
-    servico = ServicoDAO.buscar_por_id(data["servico_id"])
-
-    if not servico:
-        return jsonify({"erro": "Serviço não encontrado"}), 404
-
-    conflito = AgendamentoDAO.verificar_conflito(
+    if not HorariosLivresService.verificar_disponibilidade(
         data["profissional_id"],
         data_hora,
         servico["duracao_minutos"]
-    )
+    ):
+        return jsonify({"erro": "Horário indisponível para este profissional"}), 409
 
-    if conflito:
-        return jsonify({
-            "erro": "Horário indisponível para este profissional"
-        }), 409
-
-    agendamento_id = AgendamentoDAO.criar(
-        data["cliente_id"],
-        data["profissional_id"],
-        data["servico_id"],
-        data_hora
-    )
-
+    agendamento_id = AgendamentoDAO.criar(...)
     return jsonify({"id": agendamento_id}), 201
 
 

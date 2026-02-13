@@ -34,3 +34,46 @@ class ClienteDAO:
         conn.close()
 
         return clientes
+    
+
+    @staticmethod
+    def buscar_por_id(cliente_id):
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM clientes WHERE id = %s", (cliente_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+
+    @staticmethod
+    def atualizar(cliente_id, dados):
+        conn = get_connection()
+        cursor = conn.cursor()
+        fields = []
+        values = []
+        for key in ['nome', 'email', 'telefone']:
+            if key in dados:
+                fields.append(f"{key} = %s")
+                values.append(dados[key])
+        if not fields:
+            return False
+        values.append(cliente_id)
+        query = f"UPDATE clientes SET {', '.join(fields)} WHERE id = %s"
+        cursor.execute(query, values)
+        conn.commit()
+        affected = cursor.rowcount
+        cursor.close()
+        conn.close()
+        return affected > 0
+
+    @staticmethod
+    def deletar(cliente_id):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM clientes WHERE id = %s", (cliente_id,))
+        conn.commit()
+        affected = cursor.rowcount
+        cursor.close()
+        conn.close()
+        return affected > 0
