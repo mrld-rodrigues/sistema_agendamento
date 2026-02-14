@@ -11,17 +11,51 @@ agendamentos_bp = Blueprint("agendamentos", __name__)
 @agendamentos_bp.route("", methods=["POST"])
 def criar_agendamento():
     data = request.json
-    # ... converter data_hora, buscar serviço ...
 
-    if not HorariosLivresService.verificar_disponibilidade(
-        data["profissional_id"],
-        data_hora,
-        servico["duracao_minutos"]
-    ):
-        return jsonify({"erro": "Horário indisponível para este profissional"}), 409
+    # Validar campos obrigatórios
+    campos = ["cliente_id", "profissional_id", "servico_id", "data_hora"]
+    if not all(c in data for c in campos):
+        return jsonify({"erro": "Campos obrigatórios: " + ", ".join(campos)}), 400
 
-    agendamento_id = AgendamentoDAO.criar(...)
-    return jsonify({"id": agendamento_id}), 201
+    # Converter data_hora para datetime
+    try:
+        data_hora = datetime.fromisoformat(data["data_hora"])
+    except ValueError:
+        try:
+            data_hora = datetime.strptime(data["data_hora"], "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            return jsonify({"erro": "Formato de data/hora inválido. Use ISO ou YYYY-MM-DD HH:MM:SS"}), 400
+
+    # Buscar serviço
+    servico = ServicoDAO.buscar_por_id(data["servico_id"])
+    if not servico:
+        return jsonify({"erro": "Serviço não encontrado"}), 404
+
+    # Verificar disponibilidade usando o serviço
+    try:
+        disponivel = HorariosLivresService.verificar_disponibilidade(
+            profissional_id=data["profissional_id"],
+            data_hora_inicio=data_hora,
+            duracao_minutos=servico["duracao_minutos"]
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao verificar disponibilidade: {str(e)}"}), 500
+
+    if not disponivel:
+        return jsonify({"erro": "Horário indisponível para este profissional (conflito com agendamento ou bloqueio)"}), 409
+
+    # Criar agendamento
+    try:
+        agendamento_id = AgendamentoDAO.criar(
+            cliente_id=data["cliente_id"],
+            profissional_id=data["profissional_id"],
+            servico_id=data["servico_id"],
+            data_hora=data_hora
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao criar agendamento: {str(e)}"}), 500
+
+    return jsonify({"id": agendamento_id, "mensagem": "Agendamento criado com sucesso"}), 201
 
 
 @agendamentos_bp.route("", methods=["GET"])
@@ -146,37 +180,62 @@ def calendario_completo():
 
 @agendamentos_bp.route("/horarios-livres", methods=["GET"])
 def listar_horarios_livres():
-    profissional_id = request.args.get("profissional_id")
+    """
+    Retorna os horários livres para um profissional em uma determinada data.
+    
+    Parâmetros de consulta (query string):
+        profissional_id (obrigatório): ID do profissional
+        data (obrigatório): data no formato YYYY-MM-DD
+        servico_id (opcional): ID do serviço (para obter a duração)
+        duracao (opcional): duração em minutos (usado se servico_id não for informado)
+    
+    Retorno:
+        Lista de intervalos com formato {"inicio": "HH:MM", "fim": "HH:MM"}
+    """
+    # Extrair parâmetros da query string
+    profissional_id = request.args.get("profissional_id", type=int)
     data_str = request.args.get("data")
+    servico_id = request.args.get("servico_id", type=int)
+    duracao = request.args.get("duracao", type=int)
 
+    # Validações básicas
     if not profissional_id or not data_str:
-        return jsonify({"erro": "Informe profissional_id e data"}), 400
+        return jsonify({"erro": "Informe profissional_id e data (formato YYYY-MM-DD)"}), 400
 
-    data = datetime.strptime(data_str, "%Y-%m-%d").date()
-    dia_semana = data.weekday()
+    # Converter data
+    try:
+        data = datetime.strptime(data_str, "%Y-%m-%d").date()
+    except ValueError:
+        return jsonify({"erro": "Formato de data inválido. Use YYYY-MM-DD"}), 400
 
-    jornada = HorariosTrabalhoDAO.buscar_por_profissional_e_dia(
-        profissional_id, dia_semana
-    )
+    # Determinar a duração necessária
+    duracao_necessaria = None
+    if servico_id:
+        # Buscar serviço para obter duração
+        servico = ServicoDAO.buscar_por_id(servico_id)
+        if not servico:
+            return jsonify({"erro": "Serviço não encontrado"}), 404
+        duracao_necessaria = servico["duracao_minutos"]
+    elif duracao:
+        duracao_necessaria = duracao
 
-    agendamentos = AgendamentoDAO.agendamentos_do_dia(
-        profissional_id, data
-    )
+    # Calcular horários livres usando o serviço
+    try:
+        intervalos = HorariosLivresService.calcular_horarios_livres(
+            profissional_id=profissional_id,
+            data=data,
+            duracao_necessaria=duracao_necessaria
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao calcular horários livres: {str(e)}"}), 500
 
-    bloqueios = BloqueioDAO.bloqueios_do_dia(
-        profissional_id, data
-    )
-
-    livres = calcular_horarios_livres(
-        jornada, agendamentos, bloqueios, data
-    )
-
+    # Formatar resposta
     resposta = [
         {
-            "inicio": l[0].strftime("%H:%M"),
-            "fim": l[1].strftime("%H:%M")
+            "inicio": inicio.strftime("%H:%M"),
+            "fim": fim.strftime("%H:%M")
         }
-        for l in livres
+        for inicio, fim in intervalos
     ]
 
     return jsonify(resposta), 200

@@ -1,5 +1,5 @@
 from database.connection import get_connection
-from datetime import timedelta
+from datetime import time, timedelta
 
 
 class HorariosTrabalhoDAO:    
@@ -94,4 +94,43 @@ class HorariosTrabalhoDAO:
         conn.commit()
         cursor.close()
         conn.close()
-        return afetados > 0
+        return afetados > 0    
+
+
+    @staticmethod
+    def buscar_por_profissional_e_dia(profissional_id, dia_semana):
+        """
+        Retorna os horários de trabalho de um profissional para um determinado dia da semana.
+        Os campos 'hora_inicio' e 'hora_fim' são convertidos para objetos time.
+        
+        :param profissional_id: ID do profissional
+        :param dia_semana: dia da semana (0=segunda, 6=domingo)
+        :return: lista de dicionários com 'hora_inicio' e 'hora_fim' como objetos time
+        """
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT hora_inicio, hora_fim
+            FROM horarios_trabalho
+            WHERE profissional_id = %s AND dia_semana = %s
+        """, (profissional_id, dia_semana))
+        dados = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        resultados = []
+        for d in dados:
+            # Converte timedelta para time
+            def timedelta_to_time(td):
+                if isinstance(td, timedelta):
+                    total_seconds = int(td.total_seconds())
+                    hours = total_seconds // 3600
+                    minutes = (total_seconds % 3600) // 60
+                    seconds = total_seconds % 60
+                    return time(hours, minutes, seconds)
+                return td  # se já for time, mantém (improvável)
+
+            d['hora_inicio'] = timedelta_to_time(d['hora_inicio'])
+            d['hora_fim'] = timedelta_to_time(d['hora_fim'])
+            resultados.append(d)
+        return resultados

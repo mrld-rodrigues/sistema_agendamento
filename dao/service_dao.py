@@ -9,7 +9,7 @@ class ServicoDAO:
 
         query = """
             INSERT INTO servicos (nome, descricao, duracao_minutos, preco, ativo)
-            VALUES (%s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s)
         """
 
         cursor.execute(query, (nome, descricao, duracao_minutos, preco, ativo))
