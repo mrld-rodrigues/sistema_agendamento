@@ -111,21 +111,17 @@ class AgendamentoDAO:
     def buscar_do_dia(profissional_id, data):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-
         cursor.execute("""
-            SELECT a.data_hora, s.duracao_minutos
+            SELECT a.id, a.data_hora, s.duracao_minutos
             FROM agendamentos a
             JOIN servicos s ON s.id = a.servico_id
             WHERE a.profissional_id = %s
-              AND DATE(a.data_hora) = %s
+            AND DATE(a.data_hora) = %s
             ORDER BY a.data_hora
         """, (profissional_id, data))
-
         dados = cursor.fetchall()
-
         cursor.close()
         conn.close()
-
         return dados
 
 
@@ -287,9 +283,49 @@ class AgendamentoDAO:
     
 
     @staticmethod
-    def verificar_conflito(profissional_id, inicio_intervalo, fim_intervalo, ignorar_agendamento_id=None):
+    def verificar_conflito(profissional_id, inicio_intervalo, fim_intervalo, ignorar_agendamento_id=None, buffer_minutos=0):
         """
-        Verifica se há agendamento conflitando com [inicio_intervalo, fim_intervalo).
+        Verifica se há agendamento conflitando com [inicio_intervalo, fim_intervalo),
+        considerando um buffer adicional após cada agendamento existente e após o novo.
+        
+        :return: True se houver conflito, False caso contrário
+        """
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        query = """
+            SELECT EXISTS(
+                SELECT 1
+                FROM agendamentos a
+                JOIN servicos s ON a.servico_id = s.id
+                WHERE a.profissional_id = %s
+                AND (
+                    DATE_ADD(a.data_hora, INTERVAL s.duracao_minutos + %s MINUTE) > %s
+                    OR
+                    a.data_hora < DATE_ADD(%s, INTERVAL %s MINUTE)
+                )
+        """
+        params = [profissional_id, buffer_minutos, inicio_intervalo, fim_intervalo, buffer_minutos]
+        
+        if ignorar_agendamento_id:
+            query += " AND a.id != %s"
+            params.append(ignorar_agendamento_id)
+        
+        query += ")"
+        
+        cursor.execute(query, params)
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        # result é uma tupla com um booleano (1 ou 0)
+        return result[0] == 1
+        
+
+    @staticmethod
+    def verificar_conflito_com_buffer(profissional_id, inicio_intervalo, fim_intervalo, buffer_minutos, ignorar_agendamento_id=None):
+        """
+        Verifica se há conflito com outros agendamentos considerando o buffer após cada atendimento.
         Retorna True se houver conflito.
         """
         conn = get_connection()
@@ -300,10 +336,21 @@ class AgendamentoDAO:
             FROM agendamentos a
             JOIN servicos s ON a.servico_id = s.id
             WHERE a.profissional_id = %s
-            AND a.data_hora < %s
-            AND DATE_ADD(a.data_hora, INTERVAL s.duracao_minutos MINUTE) > %s
+            AND (
+                DATE_ADD(a.data_hora, INTERVAL s.duracao_minutos + %s MINUTE) > %s
+                OR
+                a.data_hora < DATE_ADD(%s, INTERVAL %s + %s MINUTE)
+            )
         """
-        params = [profissional_id, fim_intervalo, inicio_intervalo]
+        params = [profissional_id, buffer_minutos, inicio_intervalo, fim_intervalo, (fim_intervalo - inicio_intervalo).seconds // 60, buffer_minutos]  # cuidado: a duração do novo intervalo é fim - inicio, mas podemos passar diretamente fim_intervalo e usar o buffer. Na segunda condição, precisamos do fim do novo + buffer. Vamos simplificar: usar inicio_intervalo e fim_intervalo.
+
+        # Melhor: a segunda condição: a.data_hora < DATE_ADD(%s, INTERVAL %s MINUTE) onde %s é fim_intervalo e %s é buffer. Mas precisamos da duração do novo? Não, o novo agendamento termina em fim_intervalo, então o buffer após ele é fim_intervalo + buffer. Então a condição é: a.data_hora < fim_intervalo + buffer.
+        # Então:
+        # AND ( DATE_ADD(a.data_hora, INTERVAL s.duracao_minutos + %s MINUTE) > %s
+        #       OR a.data_hora < DATE_ADD(%s, INTERVAL %s MINUTE) )
+        # onde o primeiro %s é buffer, segundo %s é inicio_intervalo, terceiro %s é fim_intervalo, quarto %s é buffer.
+
+        params = [profissional_id, buffer_minutos, inicio_intervalo, fim_intervalo, buffer_minutos]
 
         if ignorar_agendamento_id:
             query += " AND a.id != %s"
@@ -314,35 +361,6 @@ class AgendamentoDAO:
         cursor.close()
         conn.close()
         return conflito is not None
+        
+
     
-
-    @staticmethod
-    def verificar_conflito_agendamentos(profissional_id, data_hora_inicio, duracao_minutos, ignorar_agendamento_id=None):
-        """
-        Verifica se há conflito com outros agendamentos do mesmo profissional.
-        Retorna True se houver conflito.
-        """
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        data_hora_fim = data_hora_inicio + timedelta(minutes=duracao_minutos)
-
-        query = """
-            SELECT a.id
-            FROM agendamentos a
-            JOIN servicos s ON s.id = a.servico_id
-            WHERE a.profissional_id = %s
-            AND a.data_hora < %s
-            AND DATE_ADD(a.data_hora, INTERVAL s.duracao_minutos MINUTE) > %s
-        """
-        params = [profissional_id, data_hora_fim, data_hora_inicio]
-
-        if ignorar_agendamento_id:
-            query += " AND a.id != %s"
-            params.append(ignorar_agendamento_id)
-
-        cursor.execute(query, params)
-        conflito = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return conflito is not None

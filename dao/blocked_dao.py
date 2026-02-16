@@ -1,5 +1,5 @@
 from database.connection import get_connection
-from datetime import timedelta, datetime, date
+from datetime import time, timedelta, datetime, date
 
 def formatar_timedelta(td):
     """Auxiliar para converter timedelta em string HH:MM:SS (usado nas consultas antigas)"""
@@ -237,29 +237,38 @@ class BloqueioDAO:
                 'tipo': 'horario'
             })
 
-        # 3. Bloqueios recorrentes ativos na data
+       # 3. Bloqueios recorrentes ativos na data
         dia_semana = data.weekday()  # 0=segunda, 6=domingo
         cursor.execute("""
             SELECT hora_inicio, hora_fim, motivo FROM bloqueios_recorrentes
             WHERE profissional_id = %s
-              AND dia_semana = %s
-              AND (data_inicio IS NULL OR data_inicio <= %s)
-              AND (data_fim IS NULL OR data_fim >= %s)
+            AND dia_semana = %s
+            AND (data_inicio IS NULL OR data_inicio <= %s)
+            AND (data_fim IS NULL OR data_fim >= %s)
         """, (profissional_id, dia_semana, data, data))
         recorrentes = cursor.fetchall()
+
+        # Função auxiliar para converter timedelta para time
+        def timedelta_to_time(td):
+            if isinstance(td, timedelta):
+                total_seconds = int(td.total_seconds())
+                hours = total_seconds // 3600
+                minutes = (total_seconds % 3600) // 60
+                seconds = total_seconds % 60
+                return time(hours, minutes, seconds)
+            return td  # se já for time (improvável)
+
         for r in recorrentes:
-            inicio = datetime.combine(data, r['hora_inicio'])
-            fim = datetime.combine(data, r['hora_fim'])
+            hora_inicio = timedelta_to_time(r['hora_inicio'])
+            hora_fim = timedelta_to_time(r['hora_fim'])
+            inicio = datetime.combine(data, hora_inicio)
+            fim = datetime.combine(data, hora_fim)
             bloqueios.append({
                 'inicio': inicio,
                 'fim': fim,
                 'motivo': r['motivo'],
                 'tipo': 'recorrente'
             })
-
-        cursor.close()
-        conn.close()
-        return bloqueios
 
 
     # ---------- Listagem geral (para consultas administrativas) ----------
@@ -351,40 +360,17 @@ class BloqueioDAO:
         cursor.close()
         conn.close()
         return afetados > 0
-
-    
-    @staticmethod
-    def verificar_conflito_intervalo(profissional_id, inicio_intervalo, fim_intervalo):
-        """
-        Verifica se existe algum bloqueio (dia, horário ou recorrente) que conflite com o intervalo [inicio_intervalo, fim_intervalo).
-        Retorna True se houver conflito.
-        """
-        # Para simplificar, vamos buscar todos os bloqueios do dia e verificar sobreposição.
-        # Isso pode ser feito em uma única query otimizada, mas por enquanto faremos assim.
-        data = inicio_intervalo.date()
-        bloqueios = BloqueioDAO.listar_todos_bloqueios_do_dia(profissional_id, data)
-        for b in bloqueios:
-            # b['inicio'] e b['fim'] são datetimes
-            if b['inicio'] < fim_intervalo and b['fim'] > inicio_intervalo:
-                return True
-        return False
-    
+        
 
     @staticmethod
     def verificar_conflito_bloqueios(profissional_id, inicio_intervalo, fim_intervalo):
         """
         Verifica se há conflito com qualquer tipo de bloqueio (dia, horário, recorrente).
         Retorna True se houver sobreposição.
-        
-        :param profissional_id: ID do profissional
-        :param inicio_intervalo: datetime de início do período
-        :param fim_intervalo: datetime de fim do período
-        :return: bool
         """
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Extrai a data do intervalo (assumimos que não atravessa meia-noite)
         data_intervalo = inicio_intervalo.date()
 
         # 1. Verificar dia inteiro
@@ -411,7 +397,7 @@ class BloqueioDAO:
             return True
 
         # 3. Verificar bloqueios recorrentes ativos na data
-        dia_semana = data_intervalo.weekday()  # 0=segunda, 6=domingo
+        dia_semana = data_intervalo.weekday()
         cursor.execute("""
             SELECT id FROM bloqueios_recorrentes
             WHERE profissional_id = %s

@@ -12,10 +12,13 @@ def listar_agendamentos():
     data = request.args.get("data")
     profissional_id = request.args.get("profissional_id")
 
-    agendamentos = AgendamentoDAO.listar(
-        data=data,
-        profissional_id=profissional_id
-    )
+    try:
+        agendamentos = AgendamentoDAO.listar(
+            data=data,
+            profissional_id=profissional_id
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao listar agendamentos: {str(e)}"}), 500
 
     return jsonify(agendamentos)
 
@@ -65,25 +68,30 @@ def remarcar_agendamento(id):
 @admin_bp.route("/agenda", methods=["GET"])
 def agenda_profissional():
     profissional_id = request.args.get("profissional_id", type=int)
-    data = request.args.get("data")  # YYYY-MM-DD
+    data = request.args.get("data")
 
     if not profissional_id or not data:
         return jsonify({"erro": "Informe profissional_id e data"}), 400
 
     data_obj = datetime.strptime(data, "%Y-%m-%d").date()
 
-    agendamentos = AgendamentoDAO.listar_por_profissional_e_data(
-        profissional_id,
-        data_obj
-    )
+    try:
+        agendamentos = AgendamentoDAO.listar_por_profissional_e_data(
+            profissional_id,
+            data_obj
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao buscar agenda: {str(e)}"}), 500
 
     return jsonify(agendamentos)
 
 
 @admin_bp.route("/agendamentos/<int:agendamento_id>", methods=["DELETE"])
 def deletar_agendamento(agendamento_id):
-
-    sucesso = AgendamentoDAO.deletar(agendamento_id)
+    try:
+        sucesso = AgendamentoDAO.deletar(agendamento_id)
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao deletar agendamento: {str(e)}"}), 500
 
     if not sucesso:
         return jsonify({"erro": "Agendamento não encontrado"}), 404
@@ -93,45 +101,59 @@ def deletar_agendamento(agendamento_id):
 
 @admin_bp.route("/bloquear-dia", methods=["POST"])
 def bloquear_dia():
-
     data = request.json
-
-    BloqueioDAO.bloquear_dia(
-        data["profissional_id"],
-        data["data"],
-        data.get("motivo")
-    )
+    if not data or "profissional_id" not in data or "data" not in data:
+        return jsonify({"erro": "profissional_id e data são obrigatórios"}), 400
+    
+    try:
+        BloqueioDAO.bloquear_dia(
+            data["profissional_id"],
+            data["data"],
+            data.get("motivo")
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao bloquear dia: {str(e)}"}), 500
 
     return jsonify({"mensagem": "Dia bloqueado com sucesso"})
 
 
 @admin_bp.route("/bloquear-horario", methods=["POST"])
 def bloquear_horario():
-
     data = request.json
+    campos = ["profissional_id", "data", "hora_inicio", "hora_fim"]
+    if not all(c in data for c in campos):
+        return jsonify({"erro": f"Campos obrigatórios: {', '.join(campos)}"}), 400
 
-    BloqueioDAO.bloquear_horario(
-        data["profissional_id"],
-        data["data"],
-        data["hora_inicio"],
-        data["hora_fim"],
-        data.get("motivo")
-    )
+    try:
+        BloqueioDAO.bloquear_horario(
+            data["profissional_id"],
+            data["data"],
+            data["hora_inicio"],
+            data["hora_fim"],
+            data.get("motivo")
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao bloquear horário: {str(e)}"}), 500
 
     return jsonify({"mensagem": "Horário bloqueado com sucesso"})
 
 
 @admin_bp.route("/bloquear-periodo", methods=["POST"])
 def bloquear_periodo():
-
     data = request.json
+    campos = ["profissional_id", "data_inicio", "data_fim"]
+    if not all(c in data for c in campos):
+        return jsonify({"erro": f"Campos obrigatórios: {', '.join(campos)}"}), 400
 
-    BloqueioDAO.bloquear_periodo(
-        data["profissional_id"],
-        data["data_inicio"],
-        data["data_fim"],
-        data.get("motivo")
-    )
+    try:
+        BloqueioDAO.bloquear_periodo(
+            data["profissional_id"],
+            data["data_inicio"],
+            data["data_fim"],
+            data.get("motivo")
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao bloquear período: {str(e)}"}), 500
 
     return jsonify({"mensagem": "Período bloqueado com sucesso"})
 
@@ -144,15 +166,20 @@ def listar_bloqueios_admin():
     if not profissional_id:
         return jsonify({"erro": "profissional_id obrigatório"}), 400
 
-    dados = BloqueioDAO.listar_todos_bloqueios(profissional_id, data)
+    try:
+        dados = BloqueioDAO.listar_todos_bloqueios(profissional_id, data)
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao listar bloqueios: {str(e)}"}), 500
 
     return jsonify(dados)
 
 
 @admin_bp.route("/bloqueios/<int:bloqueio_id>", methods=["DELETE"])
 def apagar_bloqueio_dia_admin(bloqueio_id):
-
-    sucesso = BloqueioDAO.apagar_bloqueios_dia(bloqueio_id)
+    try:
+        sucesso = BloqueioDAO.apagar_bloqueios_dia(bloqueio_id)
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao deletar bloqueio: {str(e)}"}), 500
 
     if not sucesso:
         return jsonify({"erro": "Bloqueio não encontrado"}), 404
@@ -162,24 +189,15 @@ def apagar_bloqueio_dia_admin(bloqueio_id):
 
 @admin_bp.route("/bloqueios/horario/<int:bloqueio_id>", methods=["DELETE"])
 def apagar_bloqueio_horario_admin(bloqueio_id):
-
-    sucesso = BloqueioDAO.apagar_bloqueios_horario(bloqueio_id)
+    try:
+        sucesso = BloqueioDAO.apagar_bloqueios_horario(bloqueio_id)
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao deletar bloqueio: {str(e)}"}), 500
 
     if not sucesso:
         return jsonify({"erro": "Bloqueio não encontrado"}), 404
 
     return jsonify({"mensagem": "Bloqueio removido com sucesso"})
-
-
-@admin_bp.route("/bloqueios/periodo/<int:bloqueio_id>", methods=["DELETE"])
-def apagar_bloqueio_periodo_admin(bloqueio_id):
-
-    sucesso = BloqueioDAO.apagar_bloqueios_periodo(bloqueio_id)
-
-    if not sucesso:
-        return jsonify({"erro": "Bloqueio não encontrado"}), 404
-
-    return jsonify({"mensagem": "Bloqueio removido com sucesso"})    
 
 
 @admin_bp.route("/bloqueios/recorrente", methods=["POST"])
@@ -225,7 +243,12 @@ def admin_listar_bloqueios_recorrentes():
 
 @admin_bp.route("/bloqueios/recorrente/<int:bloqueio_id>", methods=["DELETE"])
 def admin_deletar_bloqueio_recorrente(bloqueio_id):
-    sucesso = BloqueioDAO.apagar_bloqueio_recorrente(bloqueio_id)
+    try:
+        sucesso = BloqueioDAO.apagar_bloqueio_recorrente(bloqueio_id)
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao deletar bloqueio recorrente: {str(e)}"}), 500
+
     if not sucesso:
         return jsonify({"erro": "Bloqueio recorrente não encontrado"}), 404
-    return jsonify({"mensagem": "Bloqueio recorrente removido com sucesso"}), 200
+
+    return jsonify({"mensagem": "Bloqueio recorrente removido com sucesso"})

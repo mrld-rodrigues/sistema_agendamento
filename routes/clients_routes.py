@@ -6,19 +6,27 @@ clientes_bp = Blueprint("clientes", __name__)
 @clientes_bp.route("", methods=["POST"])
 def criar_cliente():
     data = request.json
+    if not data or "nome" not in data:
+        return jsonify({"erro": "O campo 'nome' é obrigatório"}), 400
 
-    cliente_id = ClienteDAO.criar(
-        data["nome"],
-        data["email"],
-        data["telefone"]
-    )
+    try:
+        cliente_id = ClienteDAO.criar(
+            data["nome"],
+            data.get("email"),
+            data.get("telefone")
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao criar cliente: {str(e)}"}), 500
 
     return jsonify({"id": cliente_id}), 201
 
 
 @clientes_bp.route("", methods=["GET"])
 def listar_clientes():
-    clientes = ClienteDAO.listar()
+    try:
+        clientes = ClienteDAO.listar()
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao listar clientes: {str(e)}"}), 500
     return jsonify(clientes), 200
 
 

@@ -14,17 +14,22 @@ class HorariosLivresService:
         """
         data_hora_fim = data_hora_inicio + timedelta(minutes=duracao_minutos)
 
-        # Verificar conflito com agendamentos
+        # Obter buffer do profissional
+        profissional = ProfissionalDAO.buscar_por_id(profissional_id)
+        buffer = profissional.get('intervalo_minutos', 0) if profissional else 0
+
+        # Verificar conflito com agendamentos (incluindo buffer)
         if AgendamentoDAO.verificar_conflito(
             profissional_id,
             data_hora_inicio,
             data_hora_fim,
-            ignorar_agendamento_id
+            ignorar_agendamento_id,
+            buffer
         ):
             return False
 
-        # Verificar conflito com bloqueios
-        if BloqueioDAO.verificar_conflito_intervalo(
+        # Verificar conflito com bloqueios (usando método otimizado)
+        if BloqueioDAO.verificar_conflito_bloqueios(
             profissional_id,
             data_hora_inicio,
             data_hora_fim

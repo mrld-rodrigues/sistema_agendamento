@@ -64,14 +64,15 @@ def listar_agendamentos():
     data = request.args.get("data")
 
     if not profissional_id or not data:
-        return jsonify({
-            "erro": "Informe profissional_id e data (YYYY-MM-DD)"
-        }), 400
+        return jsonify({"erro": "Informe profissional_id e data (YYYY-MM-DD)"}), 400
 
-    agendamentos = AgendamentoDAO.listar_por_profissional_e_data(
-        profissional_id,
-        data
-    )
+    try:
+        agendamentos = AgendamentoDAO.listar_por_profissional_e_data(
+            profissional_id,
+            data
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao listar agendamentos: {str(e)}"}), 500
 
     return jsonify(agendamentos), 200
 
@@ -82,62 +83,17 @@ def agenda_semanal():
     data_inicio = request.args.get("data_inicio")
 
     if not profissional_id or not data_inicio:
-        return jsonify({
-            "erro": "Informe profissional_id e data_inicio (YYYY-MM-DD)"
-        }), 400
+        return jsonify({"erro": "Informe profissional_id e data_inicio (YYYY-MM-DD)"}), 400
 
-    agendamentos = AgendamentoDAO.listar_semana(
-        profissional_id,
-        data_inicio
-    )
+    try:
+        agendamentos = AgendamentoDAO.listar_semana(
+            profissional_id,
+            data_inicio
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao listar agenda semanal: {str(e)}"}), 500
 
     return jsonify(agendamentos), 200
-
-
-@agendamentos_bp.route("/livres", methods=["GET"])
-def horarios_livres():
-    profissional_id = request.args.get("profissional_id")
-    data = request.args.get("data")
-
-    if not profissional_id or not data:
-        return jsonify({
-            "erro": "Informe profissional_id e data (YYYY-MM-DD)"
-        }), 400
-
-    agendados = AgendamentoDAO.buscar_do_dia(
-        profissional_id,
-        data
-    )
-
-    inicio_trabalho = datetime.strptime(f"{data} 18:00:00", "%Y-%m-%d %H:%M:%S")
-    fim_trabalho = datetime.strptime(f"{data} 23:59:59", "%Y-%m-%d %H:%M:%S")
-
-    duracao_servico = timedelta(minutes=240)
-
-    livres = []
-    atual = inicio_trabalho
-
-    for item in agendados:
-        inicio_ocupado = item["data_hora"]
-        fim_ocupado = inicio_ocupado + timedelta(
-            minutes=item["duracao_minutos"]
-        )
-
-        if atual + duracao_servico <= inicio_ocupado:
-            livres.append({
-                "inicio": atual.strftime("%H:%M"),
-                "fim": inicio_ocupado.strftime("%H:%M")
-            })
-
-        atual = fim_ocupado
-
-    if atual + duracao_servico <= fim_trabalho:
-        livres.append({
-            "inicio": atual.strftime("%H:%M"),
-            "fim": fim_trabalho.strftime("%H:%M")
-        })
-
-    return jsonify(livres), 200
 
 
 @agendamentos_bp.route("/mes", methods=["GET"])
@@ -147,15 +103,16 @@ def calendario_mes():
     mes = request.args.get("mes")
 
     if not profissional_id or not ano or not mes:
-        return jsonify({
-            "erro": "Informe profissional_id, ano e mes"
-        }), 400
+        return jsonify({"erro": "Informe profissional_id, ano e mes"}), 400
 
-    calendario = AgendamentoDAO.calendario_mensal(
-        profissional_id,
-        ano,
-        mes
-    )
+    try:
+        calendario = AgendamentoDAO.calendario_mensal(
+            profissional_id,
+            ano,
+            mes
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao gerar calendário mensal: {str(e)}"}), 500
 
     return jsonify(calendario), 200
 
@@ -169,11 +126,14 @@ def calendario_completo():
     if not profissional_id or not ano or not mes:
         return jsonify({"erro": "Informe profissional_id, ano e mes"}), 400
 
-    calendario = AgendamentoDAO.calendario_completo(
-        profissional_id,
-        ano,
-        mes
-    )
+    try:
+        calendario = AgendamentoDAO.calendario_completo(
+            profissional_id,
+            ano,
+            mes
+        )
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao gerar calendário completo: {str(e)}"}), 500
 
     return jsonify(calendario), 200
 
