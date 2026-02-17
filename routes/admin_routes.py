@@ -1,13 +1,17 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from dao.scheduling_dao import AgendamentoDAO
 from dao.blocked_dao import BloqueioDAO
 from datetime import datetime
 from services.horarios_livres_services import HorariosLivresService
+from utils.decorators import admin_required
 
 admin_bp = Blueprint("admin", __name__)
 
 
 @admin_bp.route("/agendamentos", methods=["GET"])
+@jwt_required()
+@admin_required
 def listar_agendamentos():
     data = request.args.get("data")
     profissional_id = request.args.get("profissional_id")
