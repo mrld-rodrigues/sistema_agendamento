@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from dao.service_dao import ServicoDAO
+from utils.decorators import admin_required
 
 servicos_bp = Blueprint("servicos", __name__)
 
@@ -14,6 +16,8 @@ servicos_bp = Blueprint("servicos", __name__)
 #   - ativo (opcional, padrão True)
 # ------------------------------------------------------------
 @servicos_bp.route("", methods=["POST"])
+@jwt_required()
+@admin_required
 def criar_servico():
     data = request.get_json()
 
@@ -88,6 +92,8 @@ def buscar_servico(id):
 #   (nome, descricao, duracao_minutos, preco, ativo)
 # ------------------------------------------------------------
 @servicos_bp.route("/<int:id>", methods=["PUT"])
+@jwt_required()
+@admin_required
 def atualizar_servico(id):
     data = request.get_json()
     if not data:
@@ -110,6 +116,8 @@ def atualizar_servico(id):
 # ATENÇÃO: Isso apaga o registro do banco. Se preferir, pode-se apenas desativar.
 # ------------------------------------------------------------
 @servicos_bp.route("/<int:id>", methods=["DELETE"])
+@jwt_required()
+@admin_required
 def deletar_servico(id):
     try:
         sucesso = ServicoDAO.deletar(id)

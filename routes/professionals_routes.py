@@ -1,5 +1,9 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from dao.professional_dao import ProfissionalDAO
+from dao.user_dao import UsuarioDAO
+from utils.decorators import admin_required
+
 
 profissionais_bp = Blueprint("profissionais", __name__)
 
@@ -14,6 +18,8 @@ profissionais_bp = Blueprint("profissionais", __name__)
 #   - intervalo_minutos (opcional, padrão 15)
 # ------------------------------------------------------------
 @profissionais_bp.route("", methods=["POST"])
+@jwt_required()
+@admin_required
 def criar_profissional():
     data = request.get_json()
 
@@ -87,23 +93,47 @@ def buscar_profissional(id):
 # Corpo da requisição (JSON): qualquer campo que se deseja alterar
 #   (nome, profissao, email, telefone, intervalo_minutos, ativo)
 # ------------------------------------------------------------
-@profissionais_bp.route("/<int:id>", methods=["PUT"])
+@profissionais_bp.route('/<int:id>', methods=['PUT'])
+@jwt_required()
 def atualizar_profissional(id):
-    data = request.get_json()
-    if not data:
-        return jsonify({"erro": "Nenhum dado enviado para atualização"}), 400
-
-    # Remove chaves vazias ou None se quiser, mas vamos passar tudo que veio
-    # O DAO já ignora campos não existentes
     try:
+        # 1. Obtém o usuário logado
+        user_id = get_jwt_identity()
+        usuario = UsuarioDAO.buscar_por_id(user_id)
+        if not usuario:
+            return jsonify({'erro': 'Usuário não encontrado'}), 404
+
+        # 2. Verifica permissão
+        # Admin pode atualizar qualquer profissional; profissional só pode atualizar a si mesmo
+        if usuario['tipo'] == 'admin':
+            pass  # autorizado
+        elif usuario['tipo'] == 'profissional' and usuario.get('profissional_id') == id:
+            pass  # autorizado
+        else:
+            return jsonify({'erro': 'Acesso negado'}), 403
+
+        # 3. Valida o corpo da requisição
+        data = request.get_json()
+        if not data:
+            return jsonify({'erro': 'Nenhum dado enviado para atualização'}), 400
+
+        # (Opcional) Verifica se há pelo menos um campo válido
+        campos_permitidos = ['nome', 'profissao', 'email', 'telefone', 'intervalo_minutos', 'ativo']
+        if not any(campo in data for campo in campos_permitidos):
+            return jsonify({'erro': 'Nenhum campo válido para atualização'}), 400
+
+        # 4. Tenta atualizar no banco
         sucesso = ProfissionalDAO.atualizar(id, data)
+
+        if not sucesso:
+            # Pode ser que o profissional não exista ou nenhum campo foi alterado
+            return jsonify({'erro': 'Profissional não encontrado ou nenhuma alteração realizada'}), 404
+
+        return jsonify({'mensagem': 'Profissional atualizado com sucesso'}), 200
+
     except Exception as e:
-        return jsonify({"erro": f"Erro ao atualizar profissional: {str(e)}"}), 500
-
-    if not sucesso:
-        return jsonify({"erro": "Profissional não encontrado ou nenhuma alteração realizada"}), 404
-
-    return jsonify({"mensagem": "Profissional atualizado com sucesso"}), 200
+        # 5. Tratamento de exceções inesperadas
+        return jsonify({'erro': 'Erro interno no servidor'}), 500
 
 
 # ------------------------------------------------------------
@@ -113,6 +143,8 @@ def atualizar_profissional(id):
 #          use a atualização com {"ativo": false}
 # ------------------------------------------------------------
 @profissionais_bp.route("/<int:id>", methods=["DELETE"])
+@jwt_required()
+@admin_required
 def deletar_profissional(id):
     try:
         sucesso = ProfissionalDAO.deletar(id)
