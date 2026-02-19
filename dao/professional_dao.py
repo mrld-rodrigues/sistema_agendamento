@@ -2,14 +2,14 @@ from database.connection import get_connection
 
 class ProfissionalDAO:
     @staticmethod
-    def criar(nome, profissao, email=None, telefone=None, intervalo_minutos=15):
+    def criar(nome, especialidade, email=None, telefone=None, intervalo_minutos=15):
         conn = get_connection()
         cursor = conn.cursor()
         query = """
             INSERT INTO profissionais (nome, especialidade, email, telefone, intervalo_minutos)
             VALUES (%s, %s, %s, %s, %s)
         """
-        cursor.execute(query, (nome, profissao, email, telefone, intervalo_minutos))
+        cursor.execute(query, (nome, especialidade, email, telefone, intervalo_minutos))
         conn.commit()
         prof_id = cursor.lastrowid
         cursor.close()
@@ -44,7 +44,7 @@ class ProfissionalDAO:
 
     @staticmethod
     def atualizar(profissional_id, dados):
-        # dados pode conter nome, profissao, email, telefone, intervalo_minutos, ativo
+        # dados pode conter nome, especialidade, email, telefone, intervalo_minutos, ativo
         conn = get_connection()
         cursor = conn.cursor()
         fields = []

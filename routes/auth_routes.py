@@ -20,7 +20,7 @@ def login():
         return jsonify({'erro': 'Usuário inativo'}), 403
 
     # Criar token com identidade = id do usuário
-    access_token = create_access_token(identity=usuario['id'])
+    access_token = create_access_token(identity=str(usuario['id']))
     return jsonify({
         'access_token': access_token,
         'tipo': usuario['tipo']

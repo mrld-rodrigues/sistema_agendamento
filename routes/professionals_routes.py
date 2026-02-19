@@ -24,12 +24,12 @@ def criar_profissional():
     data = request.get_json()
 
     # Validação dos campos obrigatórios
-    if not data or "nome" not in data or "profissao" not in data:
-        return jsonify({"erro": "Os campos 'nome' e 'profissao' são obrigatórios"}), 400
+    if not data or "nome" not in data or "especialidade" not in data:
+        return jsonify({"erro": "Os campos 'nome' e 'especialidade' são obrigatórios"}), 400
 
     # Extrai os dados com valores padrão para opcionais
     nome = data["nome"]
-    profissao = data["profissao"]
+    especialidade = data["especialidade"]
     email = data.get("email")  # None se não existir
     telefone = data.get("telefone")
     intervalo_minutos = data.get("intervalo_minutos", 15)  # padrão 15
@@ -38,7 +38,7 @@ def criar_profissional():
     try:
         profissional_id = ProfissionalDAO.criar(
             nome=nome,
-            profissao=profissao,
+            especialidade=especialidade,
             email=email,
             telefone=telefone,
             intervalo_minutos=intervalo_minutos
