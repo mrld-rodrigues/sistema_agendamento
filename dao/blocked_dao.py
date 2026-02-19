@@ -220,6 +220,7 @@ class BloqueioDAO:
                 'motivo': d['motivo'],
                 'tipo': 'dia'
             })
+        return bloqueios
 
         # 2. Horários bloqueados
         cursor.execute("""
@@ -336,6 +337,63 @@ class BloqueioDAO:
         conn.close()
         return dados
 
+
+    # ---------- Listagem de bloqueios (por ID) ----------
+    @staticmethod
+    def buscar_bloqueio_dia_por_id(bloqueio_id):
+        """
+        Busca um bloqueio de dia inteiro pelo ID.
+        Retorna o dicionário com os dados ou None se não existir.
+        Lança exceção em caso de erro de banco.
+        """
+        try:
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM dias_bloqueados WHERE id = %s", (bloqueio_id,))
+            result = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            return result
+        except Exception as e:
+            # Log do erro (aqui você pode usar logging)
+            print(f"Erro ao buscar bloqueio de dia {bloqueio_id}: {str(e)}")
+            raise  # Relança a exceção para ser tratada na camada superior
+
+    @staticmethod
+    def buscar_bloqueio_horario_por_id(bloqueio_id):
+        """
+        Busca um bloqueio de horário específico pelo ID.
+        Retorna o dicionário com os dados ou None se não existir.
+        """
+        try:
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM horarios_bloqueados WHERE id = %s", (bloqueio_id,))
+            result = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            return result
+        except Exception as e:
+            print(f"Erro ao buscar bloqueio de horário {bloqueio_id}: {str(e)}")
+            raise
+
+    @staticmethod
+    def buscar_bloqueio_recorrente_por_id(bloqueio_id):
+        """
+        Busca um bloqueio recorrente pelo ID.
+        Retorna o dicionário com os dados ou None se não existir.
+        """
+        try:
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM bloqueios_recorrentes WHERE id = %s", (bloqueio_id,))
+            result = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            return result
+        except Exception as e:
+            print(f"Erro ao buscar bloqueio recorrente {bloqueio_id}: {str(e)}")
+            raise
 
     # ---------- Deleções ----------
     @staticmethod

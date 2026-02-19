@@ -6,7 +6,7 @@ class ProfissionalDAO:
         conn = get_connection()
         cursor = conn.cursor()
         query = """
-            INSERT INTO profissionais (nome, profissao, email, telefone, intervalo_minutos)
+            INSERT INTO profissionais (nome, especialidade, email, telefone, intervalo_minutos)
             VALUES (%s, %s, %s, %s, %s)
         """
         cursor.execute(query, (nome, profissao, email, telefone, intervalo_minutos))
@@ -49,7 +49,7 @@ class ProfissionalDAO:
         cursor = conn.cursor()
         fields = []
         values = []
-        for key in ['nome', 'profissao', 'email', 'telefone', 'intervalo_minutos', 'ativo']:
+        for key in ['nome', 'especialidade', 'email', 'telefone', 'intervalo_minutos', 'ativo']:
             if key in dados:
                 fields.append(f"{key} = %s")
                 values.append(dados[key])

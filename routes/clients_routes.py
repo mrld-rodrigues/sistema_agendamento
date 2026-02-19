@@ -8,7 +8,7 @@ clientes_bp = Blueprint("clientes", __name__)
 
 @clientes_bp.route("", methods=["POST"])
 @jwt_required()
-# @admin_required
+@admin_required
 def criar_cliente():
     data = request.json
     if not data or "nome" not in data:
