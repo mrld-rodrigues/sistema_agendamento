@@ -219,8 +219,8 @@ class BloqueioDAO:
                 'fim': fim,
                 'motivo': d['motivo'],
                 'tipo': 'dia'
-            })
-        return bloqueios
+            })            
+        
 
         # 2. Horários bloqueados
         cursor.execute("""
@@ -270,6 +270,10 @@ class BloqueioDAO:
                 'motivo': r['motivo'],
                 'tipo': 'recorrente'
             })
+
+        cursor.close()
+        conn.close()
+        return bloqueios
 
 
     # ---------- Listagem geral (para consultas administrativas) ----------
