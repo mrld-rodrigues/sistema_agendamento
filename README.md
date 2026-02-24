@@ -15,7 +15,7 @@ Funcionalidades
 
     Diferentes níveis de acesso (admin, profissional, cliente)
 
-<h3>Tecnologias utilizadas<h3>
+<h3>Tecnologias utilizadas</h3>
 
     Python 3.8+
 
@@ -29,7 +29,7 @@ Funcionalidades
 
     python-dotenv
 
-<h3>Pré-requisitos<h3>
+<h3>Pré-requisitos</h3>
 
     Python 3.8 ou superior
 
@@ -39,23 +39,23 @@ Funcionalidades
 
     Git (opcional, para clonar o repositório)
 
-<h3>Instalação<h3>
+<h3>Instalação</h3>
 
     Clone o repositório
 
     git clone https://github.com/mrld-rodrigues/sistema_agendamento.git
 
-<h3>Crie e ative um ambiente virtual<h3>
+<h3>Crie e ative um ambiente virtual</h3>
 
     python -m venv venv
     source venv/bin/activate  # Linux/macOS
     venv\Scripts\activate     # Windows
 
-<h3>Instale as dependências<h3>
+<h3>Instale as dependências</h3>
 
     pip install -r requirements.txt
 
-<h3>Configure as variáveis de ambiente<h3>
+<h3>Configure as variáveis de ambiente</h3>
 
     Crie um arquivo .env na raiz do projeto com o seguinte conteúdo (ajuste os valores conforme seu ambiente):
 
@@ -66,7 +66,7 @@ Funcionalidades
     DB_PORT=3306
     JWT_SECRET_KEY=uma-chave-secreta-forte
 
-<h3>Crie o banco de dados<h3>
+<h3>Crie o banco de dados</h3>
 
     Usando o MySQL ou o MariaDB
     Use o dump(sistema_back_up.sql) que está no diretório sistema_agendamento/suport
