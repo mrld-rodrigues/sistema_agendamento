@@ -1,0 +1,10 @@
+
+
+# Login como cliente (ID 20, cliente_id=20)
+curl -X POST http://localhost:5000/auth/login -H "Content-Type: application/json" -d '{"email": "joao_silva@email.com", "senha": "123456"}'
+
+# Login como profissional (ID 4, profissional_id=4)
+curl -X POST http://localhost:5000/auth/login -H "Content-Type: application/json" -d '{"email": "caos@email.com", "senha": "123456"}'
+
+# Login como admin (ID 3)
+curl -X POST http://localhost:5000/auth/login -H "Content-Type: application/json" -d '{"email": "admin@exemplo.com", "senha": "admin123"}'

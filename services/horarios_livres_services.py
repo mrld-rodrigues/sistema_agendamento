@@ -8,32 +8,33 @@ class HorariosLivresService:
     
     @staticmethod
     def verificar_disponibilidade(profissional_id, data_hora_inicio, duracao_minutos, ignorar_agendamento_id=None):
-        """
-        Verifica se um profissional está disponível em um determinado horário.
-        Retorna True se disponível, False caso contrário.
-        """
         data_hora_fim = data_hora_inicio + timedelta(minutes=duracao_minutos)
 
-        # Obter buffer do profissional
         profissional = ProfissionalDAO.buscar_por_id(profissional_id)
         buffer = profissional.get('intervalo_minutos', 0) if profissional else 0
 
-        # Verificar conflito com agendamentos (incluindo buffer)
-        if AgendamentoDAO.verificar_conflito(
+        # Verificar conflito com agendamentos
+        conflito_agendamentos = AgendamentoDAO.verificar_conflito(
             profissional_id,
             data_hora_inicio,
             data_hora_fim,
             ignorar_agendamento_id,
             buffer
-        ):
+        )
+        print(f"Verificando conflito agendamentos: {conflito_agendamentos}")  # DEBUG
+
+        if conflito_agendamentos:
             return False
 
-        # Verificar conflito com bloqueios (usando método otimizado)
-        if BloqueioDAO.verificar_conflito_bloqueios(
+        # Verificar conflito com bloqueios
+        conflito_bloqueios = BloqueioDAO.verificar_conflito_bloqueios(
             profissional_id,
             data_hora_inicio,
             data_hora_fim
-        ):
+        )
+        print(f"Verificando conflito bloqueios: {conflito_bloqueios}")  # DEBUG
+
+        if conflito_bloqueios:
             return False
 
         return True

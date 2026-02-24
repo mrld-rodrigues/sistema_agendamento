@@ -285,41 +285,32 @@ class AgendamentoDAO:
     @staticmethod
     def verificar_conflito(profissional_id, inicio_intervalo, fim_intervalo, ignorar_agendamento_id=None, buffer_minutos=0):
         """
-        Verifica se há agendamento conflitando com [inicio_intervalo, fim_intervalo),
-        considerando um buffer adicional após cada agendamento existente e após o novo.
-        
-        :return: True se houver conflito, False caso contrário
+        Verifica se há conflito com outros agendamentos considerando buffer.
+        Retorna True se houver conflito, False caso contrário.
         """
         conn = get_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
         
         query = """
-            SELECT EXISTS(
-                SELECT 1
-                FROM agendamentos a
-                JOIN servicos s ON a.servico_id = s.id
-                WHERE a.profissional_id = %s
-                AND (
-                    DATE_ADD(a.data_hora, INTERVAL s.duracao_minutos + %s MINUTE) > %s
-                    OR
-                    a.data_hora < DATE_ADD(%s, INTERVAL %s MINUTE)
-                )
+            SELECT COUNT(*) as total
+            FROM agendamentos a
+            JOIN servicos s ON a.servico_id = s.id
+            WHERE a.profissional_id = %s
+            AND a.data_hora < %s
+            AND DATE_ADD(a.data_hora, INTERVAL s.duracao_minutos + %s MINUTE) > %s
         """
-        params = [profissional_id, buffer_minutos, inicio_intervalo, fim_intervalo, buffer_minutos]
+        params = [profissional_id, fim_intervalo, buffer_minutos, inicio_intervalo]
         
         if ignorar_agendamento_id:
             query += " AND a.id != %s"
             params.append(ignorar_agendamento_id)
-        
-        query += ")"
         
         cursor.execute(query, params)
         result = cursor.fetchone()
         cursor.close()
         conn.close()
         
-        # result é uma tupla com um booleano (1 ou 0)
-        return result[0] == 1
+        return result['total'] > 0
         
 
     @staticmethod
