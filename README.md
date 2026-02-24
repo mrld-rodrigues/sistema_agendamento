@@ -1,4 +1,4 @@
-<h1>Agendamento API<h1>
+<h1>Agendamento API</h1>
 
 Uma API RESTful para gerenciamento de agendamentos de serviços, construída com Flask e MySQL. Permite o cadastro de clientes, profissionais, serviços, bloqueios de horários e a criação/consulta de agendamentos, com autenticação via JWT.
 Funcionalidades
