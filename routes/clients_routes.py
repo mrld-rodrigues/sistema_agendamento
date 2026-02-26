@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from dao.client_dao import ClienteDAO
+from dao.scheduling_dao import AgendamentoDAO
 from dao.user_dao import UsuarioDAO
 from utils.decorators import admin_required
 
@@ -123,3 +124,28 @@ def deletar_cliente(id):
         return jsonify({"erro": "Cliente não encontrado"}), 404
 
     return jsonify({"mensagem": "Cliente deletado com sucesso"}), 200
+
+
+@clientes_bp.route('/me/appointments', methods=['GET'])
+@jwt_required()
+def meus_agendamentos():
+    """Retorna todos os agendamentos do cliente logado."""
+    try:
+        user_id = get_jwt_identity()
+        usuario = UsuarioDAO.buscar_por_id(user_id)
+        if not usuario:
+            return jsonify({'erro': 'Usuário não encontrado'}), 404
+        
+        if usuario['tipo'] != 'cliente':
+            return jsonify({'erro': 'Acesso negado'}), 403
+        
+        cliente_id = usuario['cliente_id']
+        if not cliente_id:
+            return jsonify({'erro': 'Cliente não vinculado'}), 400
+        
+        # Busca agendamentos pelo cliente_id
+        # Como não temos um método específico no DAO, usaremos o listar com filtro
+        agendamentos = AgendamentoDAO.listar(data=None, profissional_id=None, cliente_id=cliente_id)
+        return jsonify(agendamentos), 200
+    except Exception as e:
+        return jsonify({'erro': f'Erro ao buscar agendamentos: {str(e)}'}), 500

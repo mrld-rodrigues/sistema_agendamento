@@ -1,26 +1,49 @@
 /**
- * Arquivo: cliente.js
- * Descrição: Lógica da dashboard do cliente: listar agendamentos, redirecionar para criação.
+ * client.js - Client dashboard logic
  */
 
-// Verifica se o usuário está autenticado; se não, redireciona para login.
-checkAuth();
+document.addEventListener('DOMContentLoaded', function() {
+    checkAuth();
 
-/**
- * Carrega e exibe os agendamentos do cliente.
- * Atualmente é um placeholder, pois o backend ainda não possui um endpoint específico.
- * TODO: implementar após criar endpoint GET /clientes/me/agendamentos
- */
-async function carregarAgendamentos() {
-    const div = document.getElementById('agendamentos');
-    // Mensagem temporária enquanto a funcionalidade não está disponível
-    div.innerHTML = '<p class="text-gray-500">Funcionalidade em breve: listar seus agendamentos.</p>';
-}
+    async function loadAppointments() {
+        const div = document.getElementById('appointments');
+        if (!div) {
+            console.error('Element #appointments not found');
+            return;
+        }
 
-// Adiciona evento ao botão "Novo Agendamento" para redirecionar para a página de criação.
-document.getElementById('novoAgendamentoBtn').addEventListener('click', () => {
-    window.location.href = '/cliente/novo-agendamento';
+        try {
+            const appointments = await apiFetch('/clientes/me/appointments');
+            if (appointments.length === 0) {
+                div.innerHTML = '<p class="text-gray-500">You have no appointments yet.</p>';
+            } else {
+                let html = '';
+                appointments.forEach(app => {
+                    const date = new Date(app.data_hora).toLocaleString('pt-BR');
+                    html += `
+                        <div class="bg-white p-4 rounded shadow">
+                            <p><strong>Date:</strong> ${date}</p>
+                            <p><strong>Professional:</strong> ${app.profissional}</p>
+                            <p><strong>Service:</strong> ${app.servico} (${app.duracao_minutos} min)</p>
+                        </div>
+                    `;
+                });
+                div.innerHTML = html;
+            }
+        } catch (err) {
+            console.error('Error loading appointments:', err);
+            div.innerHTML = '<p class="text-red-500">Error loading appointments.</p>';
+        }
+    }
+
+    const newBtn = document.getElementById('newAppointmentBtn');
+    if (newBtn) {
+        newBtn.addEventListener('click', () => {
+            window.location.href = '/client/new-appointment';
+        });
+    } else {
+        console.error('Button #newAppointmentBtn not found');
+    }
+
+    loadAppointments();
 });
-
-// Executa a função ao carregar a página
-carregarAgendamentos();

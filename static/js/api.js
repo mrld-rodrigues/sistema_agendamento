@@ -16,20 +16,23 @@ const API_BASE = '';
  * @throws {Error} - Lança erro com mensagem da API ou mensagem genérica
  */
 async function apiFetch(endpoint, options = {}) {
-    // Recupera o token do localStorage (se existir)
     const token = localStorage.getItem('token');
-    // Monta os headers padrão: Content-Type JSON e Authorization Bearer (se houver token)
     const headers = {
         'Content-Type': 'application/json',
         ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers
     };
-    // Faz a requisição
     const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-    // Extrai o JSON da resposta
     const data = await response.json();
-    // Se a resposta não for OK, lança um erro com a mensagem da API (ou mensagem padrão)
+    
     if (!response.ok) {
+        // Se for erro 401 (não autorizado), faz logout automático
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('tipo');
+            window.location.href = '/auth/login';
+            throw new Error('Sessão expirada. Faça login novamente.');
+        }
         throw new Error(data.erro || 'Erro na requisição');
     }
     return data;
@@ -78,8 +81,8 @@ function checkAuth() {
  */
 function redirectByType() {
     const tipo = localStorage.getItem('tipo');
-    if (tipo === 'cliente') window.location.href = '/cliente/dashboard';
-    else if (tipo === 'profissional') window.location.href = '/profissional/dashboard';
+    if (tipo === 'cliente') window.location.href = '/client/dashboard';
+    else if (tipo === 'profissional') window.location.href = '/professional/dashboard';
     else if (tipo === 'admin') window.location.href = '/admin/dashboard';
     else window.location.href = '/auth/login'; // fallback
 }

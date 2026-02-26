@@ -5,21 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <title>Painel do Cliente</title>
+    <title>Client Dashboard</title>
 </head>
 <body class="bg-gray-100">
-    <!-- Barra de navegação superior -->
     <nav class="bg-white shadow p-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold">Meus Agendamentos</h1>
-        <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Sair</button>
+        <h1 class="text-xl font-bold">My Appointments</h1>
+        <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
     </nav>
     <main class="p-4">
-        <!-- Container onde serão exibidos os agendamentos -->
-        <div id="agendamentos" class="grid gap-4"></div>
-        <!-- Botão para criar novo agendamento -->
-        <button id="novoAgendamentoBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4">Novo Agendamento</button>
+        <div id="appointments" class="grid gap-4"></div>
+        <button id="newAppointmentBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4">New Appointment</button>
     </main>
     <script src="{{ url_for('static', filename='js/api.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/cliente.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/client.js') }}"></script>
 </body>
 </html>

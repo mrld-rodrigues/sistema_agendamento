@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <title>Registro de Cliente</title>
+    <title>Client Registration</title>
 </head>
 <body class="bg-gray-100 flex items-center justify-center h-screen">
     <div class="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 class="text-2xl font-bold mb-6 text-center">Registro de Cliente</h2>
-        <form id="registroForm">
+        <h2 class="text-2xl font-bold mb-6 text-center">Client Registration</h2>
+        <form id="registerForm">
             <div class="mb-4">
-                <label class="block text-gray-700 mb-2">Nome</label>
+                <label class="block text-gray-700 mb-2">Name</label>
                 <input type="text" id="nome" required class="w-full px-3 py-2 border rounded-lg">
             </div>
             <div class="mb-4">
@@ -20,24 +20,23 @@
                 <input type="email" id="email" required class="w-full px-3 py-2 border rounded-lg">
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 mb-2">Telefone</label>
+                <label class="block text-gray-700 mb-2">Phone</label>
                 <input type="text" id="telefone" class="w-full px-3 py-2 border rounded-lg">
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 mb-2">Senha</label>
+                <label class="block text-gray-700 mb-2">Password</label>
                 <input type="password" id="senha" required class="w-full px-3 py-2 border rounded-lg">
             </div>
-            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Registrar</button>
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Register</button>
         </form>
         <p class="mt-4 text-center">
-            <a href="/auth/login" class="text-blue-500">Voltar ao login</a>
+            <a href="/auth/login" class="text-blue-500">Back to login</a>
         </p>
     </div>
     <script src="{{ url_for('static', filename='js/api.js') }}"></script>
     <script>
-        document.getElementById('registroForm').addEventListener('submit', async (e) => {
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            // Monta objeto com os dados do formulário
             const payload = {
                 nome: document.getElementById('nome').value,
                 email: document.getElementById('email').value,
@@ -45,15 +44,14 @@
                 senha: document.getElementById('senha').value
             };
             try {
-                // Faz requisição POST para registro (endpoint público)
                 const response = await fetch('/auth/registro/cliente', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.erro || 'Erro no registro');
-                alert('Registro realizado com sucesso! Faça login.');
+                if (!response.ok) throw new Error(data.erro || 'Registration error');
+                alert('Registration successful! Please login.');
                 window.location.href = '/auth/login';
             } catch (err) {
                 alert(err.message);

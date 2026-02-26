@@ -27,30 +27,28 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 
 
 # ---------- Rotas para páginas frontend (HTML) ----------
+# Páginas públicas
 @app.route('/')
 def index():
-    """Página inicial pública."""
     return render_template('index.html')
 
+
 @app.route('/auth/login')
-def auth_login():
-    """Página de login."""
+def login_page():
     return render_template('auth/login.html')
 
-@app.route('/auth/registro/cliente')
-def auth_registro_cliente():
-    """Página de registro de cliente."""
-    return render_template('auth/registro_cliente.html')
+@app.route('/auth/register')
+def register_page():
+    return render_template('auth/register.html')
 
-@app.route('/cliente/dashboard')
-def cliente_dashboard():
-    """Dashboard do cliente (requer autenticação no frontend)."""
-    return render_template('cliente/dashboard.html')
+# Páginas do cliente (protegidas por autenticação no frontend)
+@app.route('/client/dashboard')
+def client_dashboard():
+    return render_template('client/dashboard.html')
 
-@app.route('/cliente/novo-agendamento')
-def cliente_novo_agendamento():
-    """Página para criar novo agendamento (cliente)."""
-    return render_template('cliente/novo_agendamento.html')
+@app.route('/client/new-appointment')
+def client_new_appointment():
+    return render_template('client/new_appointment.html')
 
 
 

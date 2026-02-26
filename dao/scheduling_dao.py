@@ -204,7 +204,7 @@ class AgendamentoDAO:
 
 
     @staticmethod
-    def listar(data=None, profissional_id=None):
+    def listar(data=None, profissional_id=None, cliente_id=None):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
@@ -224,23 +224,20 @@ class AgendamentoDAO:
         """
 
         params = []
-
         if data:
             query += " AND DATE(a.data_hora) = %s"
             params.append(data)
-
         if profissional_id:
             query += " AND a.profissional_id = %s"
             params.append(profissional_id)
-
+        if cliente_id:
+            query += " AND a.cliente_id = %s"
+            params.append(cliente_id)
         query += " ORDER BY a.data_hora"
-
         cursor.execute(query, params)
         resultados = cursor.fetchall()
-
         cursor.close()
         conn.close()
-
         return resultados
 
 
