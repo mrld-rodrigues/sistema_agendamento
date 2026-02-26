@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from routes.clients_routes import clientes_bp
 from routes.professionals_routes import profissionais_bp
 from routes.services_routes import servicos_bp
@@ -16,7 +16,7 @@ app.json.ensure_ascii = False  # Permitir caracteres Unicode no JSON
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'super-secret-key')  
 jwt = JWTManager(app)
 
-
+# Registro dos blueprints da API
 app.register_blueprint(clientes_bp, url_prefix="/clientes")
 app.register_blueprint(profissionais_bp, url_prefix="/profissionais")
 app.register_blueprint(servicos_bp, url_prefix="/servicos")
@@ -24,6 +24,10 @@ app.register_blueprint(agendamentos_bp, url_prefix="/agendamentos")
 app.register_blueprint(admin_bp, url_prefix="/admin")
 app.register_blueprint(bloqueios_bp, url_prefix="/bloqueios")
 app.register_blueprint(auth_bp, url_prefix='/auth')
+
+
+# ---------- Rotas para páginas frontend (HTML) ----------
+
 
 if __name__ == "__main__":
     app.run(debug=True, threaded=True)
