@@ -31,7 +31,7 @@ Estrutura de Diretórios
 text
 
 .
-├── app.py # Ponto de entrada da aplicação
+├── app.py # Ponto de entrada da aplicação<br>
 ├── utils/ # Configurações (banco de dados, JWT) Decoradores de permissão (admin_required, etc.)
 │ ├── config.py
 │ └── decorators.py #
