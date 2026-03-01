@@ -65,7 +65,7 @@ Sistema de agendamentos completo desenvolvido com Flask e MySQL, oferecendo aute
 │ └── ...<br>
 └── .env # Variáveis de ambiente<br>
 
-Configuração do Ambiente
+<h4>Configuração do Ambiente</h4><br>
 Pré-requisitos
 
     Python 3.9+
@@ -74,10 +74,9 @@ Pré-requisitos
 
     pip e virtualenv (recomendado)
 
-Passo a passo
+<h4>Passo a passo</h4>
 
-    Clone o repositório
-    bash
+Clone o repositório
 
 git clone https://github.com/seu-usuario/appointment-system.git
 cd appointment-system
@@ -94,7 +93,7 @@ bash
 
 pip install -r requirements.txt
 
-Configure o banco de dados
+<h4>Configure o banco de dados</h4>
 
     Crie um banco de dados MySQL (ex.: sistema_agendamento).
 
@@ -103,48 +102,47 @@ Configure o banco de dados
     Copie o arquivo .env.example para .env e ajuste as credenciais:
     text
 
-DB_HOST=localhost
-DB_NAME=sistema_agendamento
-DB_USER=root
-DB_PASSWORD=sua_senha
-DB_PORT=3306
-JWT_SECRET_KEY=uma_chave_secreta_forte_com_pelo_menos_32_caracteres
+DB_HOST=localhost<br>
+DB_NAME=sistema_agendamento<br>
+DB_USER=root<br>
+DB_PASSWORD=sua_senha<br>
+DB_PORT=3306<br>
+JWT_SECRET_KEY=uma_chave_secreta_forte_com_pelo_menos_32_caracteres<br>
 
-Execute a aplicação
-bash
+<h4>Execute a aplicação</h4>
 
 python app.py
 
     O servidor estará disponível em http://localhost:5000.
 
-Endpoints Principais
-Método Rota Descrição Permissão
-POST /auth/login Login Pública
-POST /auth/registro/cliente Registro de cliente Pública
-GET /auth/me Dados do usuário logado Qualquer token
-POST /clientes Criar cliente Admin
-GET /clientes Listar clientes Admin
-GET /clientes/<id> Buscar cliente Admin ou próprio
-PUT /clientes/<id> Atualizar cliente Admin ou próprio
-DELETE /clientes/<id> Deletar cliente Admin
-POST /profissionais Criar profissional Admin
-GET /profissionais Listar profissionais Pública
-GET /profissionais/<id> Buscar profissional Pública
-PUT /profissionais/<id> Atualizar profissional Admin ou próprio
-DELETE /profissionais/<id> Deletar profissional Admin
-POST /servicos Criar serviço Admin
-GET /servicos Listar serviços Pública
-GET /servicos/<id> Buscar serviço Pública
-PUT /servicos/<id> Atualizar serviço Admin
-DELETE /servicos/<id> Deletar serviço Admin
-POST /agendamentos Criar agendamento Cliente (próprio) ou admin
-GET /agendamentos Listar agendamentos (filtro) Profissional (seus) ou admin
-GET /agendamentos/horarios-livres Horários livres Pública
-DELETE /agendamentos/<id> Deletar agendamento Admin, profissional (dono) ou cliente (dono)
-POST /bloqueios/bloquear-dia Bloquear dia Profissional (próprio) ou admin
-POST /bloqueios/bloquear-horario Bloquear horário Profissional (próprio) ou admin
-POST /bloqueios/recorrente Criar bloqueio recorrente Profissional (próprio) ou admin
-GET /bloqueios/todos Listar todos os bloqueios Profissional (seus) ou admin
+Endpoints Principais<br>
+Método Rota Descrição Permissão<br>
+POST /auth/login Login Pública<br>
+POST /auth/registro/cliente Registro de cliente Pública<br>
+GET /auth/me Dados do usuário logado Qualquer token<br>
+POST /clientes Criar cliente Admin<br>
+GET /clientes Listar clientes Admin<br>
+GET /clientes/<id> Buscar cliente Admin ou próprio<br>
+PUT /clientes/<id> Atualizar cliente Admin ou próprio<br>
+DELETE /clientes/<id> Deletar cliente Admin<br>
+POST /profissionais Criar profissional Admin<br>
+GET /profissionais Listar profissionais Pública<br>
+GET /profissionais/<id> Buscar profissional Pública<br>
+PUT /profissionais/<id> Atualizar profissional Admin ou próprio<br>
+DELETE /profissionais/<id> Deletar profissional Admin<br>
+POST /servicos Criar serviço Admin<br>
+GET /servicos Listar serviços Pública<br>
+GET /servicos/<id> Buscar serviço Pública<br>
+PUT /servicos/<id> Atualizar serviço Admin<br>
+DELETE /servicos/<id> Deletar serviço Admin<br>
+POST /agendamentos Criar agendamento Cliente (próprio) ou admin<br>
+GET /agendamentos Listar agendamentos (filtro) Profissional (seus) ou admin<br>
+GET /agendamentos/horarios-livres Horários livres Pública<br>
+DELETE /agendamentos/<id> Deletar agendamento Admin, profissional (dono) ou cliente (dono)<br>
+POST /bloqueios/bloquear-dia Bloquear dia Profissional (próprio) ou admin<br>
+POST /bloqueios/bloquear-horario Bloquear horário Profissional (próprio) ou admin<br>
+POST /bloqueios/recorrente Criar bloqueio recorrente Profissional (próprio) ou admin<br>
+GET /bloqueios/todos Listar todos os bloqueios Profissional (seus) ou admin<br>
 
 Exemplos de Uso (curl)
 
@@ -168,7 +166,7 @@ curl -X POST http://localhost:5000/agendamentos \
 "data_hora": "2026-03-20 09:00:00"
 }'
 
-Frontend (opcional)
+<h4>Frontend (opcional)</h4>
 
 O projeto inclui um frontend simples servido pelo próprio Flask, localizado nas pastas templates/ e static/. Para acessar:
 
