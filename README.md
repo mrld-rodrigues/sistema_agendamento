@@ -30,7 +30,7 @@ Tecnologias
 Estrutura de Diretórios
 text
 
-.
+.<br>
 ├── app.py # Ponto de entrada da aplicação<br>
 ├── utils/ # Configurações (banco de dados, JWT) Decoradores de permissão (admin_required, etc.)
 │ ├── config.py
