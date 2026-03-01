@@ -143,18 +143,16 @@ POST /bloqueios/bloquear-dia Bloquear dia Profissional (próprio) ou admin<br>
 POST /bloqueios/bloquear-horario Bloquear horário Profissional (próprio) ou admin<br>
 POST /bloqueios/recorrente Criar bloqueio recorrente Profissional (próprio) ou admin<br>
 GET /bloqueios/todos Listar todos os bloqueios Profissional (seus) ou admin<br>
-
-Exemplos de Uso (curl)
+<br>
+<h4>Exemplos de Uso (curl)</h4>
 
 Login como cliente
-bash
 
 curl -X POST http://localhost:5000/auth/login \
  -H "Content-Type: application/json" \
  -d '{"email": "joao@email.com", "senha": "123456"}'
 
 Criar agendamento (com token)
-bash
 
 curl -X POST http://localhost:5000/agendamentos \
  -H "Authorization: Bearer SEU_TOKEN" \
