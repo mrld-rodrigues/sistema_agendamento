@@ -1,7 +1,8 @@
-Appointment System API
+<h2>Appointment System API</h2>
 
 Sistema de agendamentos completo desenvolvido com Flask e MySQL, oferecendo autenticação JWT, gerenciamento de clientes, profissionais, serviços, agendamentos e bloqueios. Ideal para portfólio demonstrando boas práticas de desenvolvimento backend.
-Funcionalidades
+
+<h4>Funcionalidades</h4>
 
     Autenticação: Registro e login de clientes, profissionais e administradores com JWT.
 
@@ -19,7 +20,7 @@ Funcionalidades
 
     Permissões: Rotas protegidas por tipo de usuário (cliente, profissional, admin).
 
-Tecnologias
+<h4>Tecnologias</h4>
 
     Backend: Flask, Flask-JWT-Extended, bcrypt
 
@@ -27,43 +28,42 @@ Tecnologias
 
     Outras: python-dotenv, mysql-connector-python
 
-Estrutura de Diretórios
-text
+<h4>Estrutura de Diretórios</h4>
 
 .<br>
 ├── app.py # Ponto de entrada da aplicação<br>
-├── utils/ # Configurações (banco de dados, JWT) Decoradores de permissão (admin_required, etc.)
-│ ├── config.py
-│ └── decorators.py #
-├── dao/ # Data Access Objects
-│ ├── blocked_dao.py
-│ ├── client_dao.py
-│ ├── professional_dao.py
-│ ├── scheduling_dao.py
-│ ├── service_dao.py
-│ ├── user_dao.py
-│ └── worktime_dao.py
-├── database/
-│ └── connection.py # Conexão com o banco
-├── routes/ # Blueprints
-│ ├── admin_routes.py
-│ ├── auth_routes.py
-│ ├── blocked_routes.py
-│ ├── clients_routes.py
-│ ├── professionals_routes.py
-│ ├── scheduling_routes.py
-│ └── services_routes.py
-├── services/ # Lógica de negócio
-│ └── horarios_livres_services.py
-├── static/ # Frontend (CSS/JS)
-│ ├── css/
-│ └── js/
-├── templates/ # Páginas HTML
-│ ├── auth/
-│ ├── client/
-│ ├── index.html
-│ └── ...
-└── .env # Variáveis de ambiente
+├── utils/ # Configurações (banco de dados, JWT) Decoradores de permissão (admin_required, etc.)<br>
+│ ├── config.py<br>
+│ └── decorators.py<br>
+├── dao/ # Data Access Objects<br>
+│ ├── blocked_dao.py<br>
+│ ├── client_dao.py<br>
+│ ├── professional_dao.py<br>
+│ ├── scheduling_dao.py<br>
+│ ├── service_dao.py<br>
+│ ├── user_dao.py<br>
+│ └── worktime_dao.py<br>
+├── database/<br>
+│ └── connection.py # Conexão com o banco<br>
+├── routes/ # Blueprints<br>
+│ ├── admin_routes.py<br>
+│ ├── auth_routes.py<br>
+│ ├── blocked_routes.py<br>
+│ ├── clients_routes.py<br>
+│ ├── professionals_routes.py<br>
+│ ├── scheduling_routes.py<br>
+│ └── services_routes.py<br>
+├── services/ # Lógica de negócio<br>
+│ └── horarios_livres_services.py<br>
+├── static/ # Frontend (CSS/JS)<br>
+│ ├── css/<br>
+│ └── js/<br>
+├── templates/ # Páginas HTML<br>
+│ ├── auth/<br>
+│ ├── client/<br>
+│ ├── index.html<br>
+│ └── ...<br>
+└── .env # Variáveis de ambiente<br>
 
 Configuração do Ambiente
 Pré-requisitos
