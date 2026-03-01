@@ -115,8 +115,8 @@ python app.py
 
     O servidor estará disponível em http://localhost:5000.
 
-Endpoints Principais<br>
-Método Rota Descrição Permissão<br>
+<h4>Endpoints Principais</h4><br><br>
+Método | Rota | Descrição | Permissão<br>
 POST /auth/login Login Pública<br>
 POST /auth/registro/cliente Registro de cliente Pública<br>
 GET /auth/me Dados do usuário logado Qualquer token<br>
