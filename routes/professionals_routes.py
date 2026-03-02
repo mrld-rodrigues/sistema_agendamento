@@ -1,5 +1,8 @@
+from datetime import date, datetime
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from dao.blocked_dao import BloqueioDAO
 from dao.professional_dao import ProfissionalDAO
 from dao.user_dao import UsuarioDAO
 from utils.decorators import admin_required
@@ -155,3 +158,45 @@ def deletar_profissional(id):
         return jsonify({"erro": "Profissional não encontrado"}), 404
 
     return jsonify({"mensagem": "Profissional deletado com sucesso"}), 200
+
+
+@profissionais_bp.route('/<int:id>/bloqueios', methods=['GET'])
+@jwt_required()
+def get_profissional_blocks(id):
+    """
+    Retorna todos os bloqueios de um profissional: dias, horários e recorrentes.
+    Acesso permitido apenas para o próprio profissional ou admin.
+    """
+    try:
+        user_id = get_jwt_identity()
+        usuario = UsuarioDAO.buscar_por_id(user_id)
+        if not usuario:
+            return jsonify({'erro': 'Usuário não encontrado'}), 404
+
+        # Verifica permissão: admin ou próprio profissional
+        if usuario['tipo'] != 'admin' and usuario.get('profissional_id') != id:
+            return jsonify({'erro': 'Acesso negado'}), 403
+
+        # Busca dias bloqueados
+        dias = BloqueioDAO.dias_bloqueados(id)
+        # Busca horários bloqueados
+        horarios = BloqueioDAO.horarios_bloqueados_do_dia(id)  # retorna todos, sem filtrar data
+        # Busca bloqueios recorrentes (sem filtro de data)
+        recorrentes = BloqueioDAO.listar_bloqueios_recorrentes(profissional_id=id)
+
+        # Converte datas para string ISO onde necessário
+        for d in dias:
+            if isinstance(d.get('data'), (date, datetime)):
+                d['data'] = d['data'].isoformat()
+        for h in horarios:
+            if isinstance(h.get('data'), (date, datetime)):
+                h['data'] = h['data'].isoformat()
+        # Recorrentes já são convertidos pelo DAO
+
+        return jsonify({
+            'dias': dias,
+            'horarios': horarios,
+            'recorrentes': recorrentes
+        }), 200
+    except Exception as e:
+        return jsonify({'erro': f'Erro ao buscar bloqueios: {str(e)}'}), 500

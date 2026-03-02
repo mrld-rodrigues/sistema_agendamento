@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Manage Blocks</title>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">Manage Blocks</h1>
+        <div>
+            <a href="/professional/dashboard" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2">Back to Agenda</a>
+            <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+        </div>
+    </nav>
+    <main class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Formulário para bloquear dia inteiro -->
+        <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-xl font-bold mb-4">Block Whole Day</h2>
+            <form id="blockDayForm">
+                <input type="hidden" id="professionalId" value="">
+                <div class="mb-2">
+                    <label class="block">Date</label>
+                    <input type="date" id="blockDate" required class="w-full border rounded px-2 py-1">
+                </div>
+                <div class="mb-2">
+                    <label class="block">Reason (optional)</label>
+                    <input type="text" id="blockReason" class="w-full border rounded px-2 py-1">
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Block Day</button>
+            </form>
+        </div>
+        <!-- Formulário para bloquear horário específico -->
+        <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-xl font-bold mb-4">Block Time Slot</h2>
+            <form id="blockTimeForm">
+                <input type="hidden" id="professionalIdTime" value="">
+                <div class="mb-2">
+                    <label class="block">Date</label>
+                    <input type="date" id="blockTimeDate" required class="w-full border rounded px-2 py-1">
+                </div>
+                <div class="mb-2">
+                    <label class="block">Start Time</label>
+                    <input type="time" id="blockStart" required class="w-full border rounded px-2 py-1">
+                </div>
+                <div class="mb-2">
+                    <label class="block">End Time</label>
+                    <input type="time" id="blockEnd" required class="w-full border rounded px-2 py-1">
+                </div>
+                <div class="mb-2">
+                    <label class="block">Reason (optional)</label>
+                    <input type="text" id="blockTimeReason" class="w-full border rounded px-2 py-1">
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Block Time</button>
+            </form>
+        </div>
+        <!-- Formulário para bloqueio recorrente -->
+        <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-xl font-bold mb-4">Recurring Block</h2>
+            <form id="recurringBlockForm">
+                <input type="hidden" id="professionalIdRec" value="">
+                <div class="mb-2">
+                    <label class="block">Day of week</label>
+                    <select id="recurringDay" required class="w-full border rounded px-2 py-1">
+                        <option value="0">Monday</option>
+                        <option value="1">Tuesday</option>
+                        <option value="2">Wednesday</option>
+                        <option value="3">Thursday</option>
+                        <option value="4">Friday</option>
+                        <option value="5">Saturday</option>
+                        <option value="6">Sunday</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="block">Start Time</label>
+                    <input type="time" id="recurringStart" required class="w-full border rounded px-2 py-1">
+                </div>
+                <div class="mb-2">
+                    <label class="block">End Time</label>
+                    <input type="time" id="recurringEnd" required class="w-full border rounded px-2 py-1">
+                </div>
+                <div class="mb-2">
+                    <label class="block">Start date (optional)</label>
+                    <input type="date" id="recurringStartDate" class="w-full border rounded px-2 py-1">
+                </div>
+                <div class="mb-2">
+                    <label class="block">End date (optional)</label>
+                    <input type="date" id="recurringEndDate" class="w-full border rounded px-2 py-1">
+                </div>
+                <div class="mb-2">
+                    <label class="block">Reason</label>
+                    <input type="text" id="recurringReason" class="w-full border rounded px-2 py-1">
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Create Recurring Block</button>
+            </form>
+        </div>
+        <!-- Lista de bloqueios existentes -->
+        <div class="bg-white p-4 rounded shadow md:col-span-2">
+            <h2 class="text-xl font-bold mb-4">Existing Blocks</h2>
+            <div id="blocksList">
+                <p class="text-gray-500">Loading...</p>
+            </div>
+        </div>
+    </main>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/professional_blocks.js') }}"></script>
+</body>
+</html>

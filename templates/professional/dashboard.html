@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Professional Dashboard</title>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">My Agenda</h1>
+        <div>
+            <a href="/professional/blocks" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2">Manage Blocks</a>
+            <a href="/professional/settings" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2">Settings</a>
+            <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+        </div>
+    </nav>
+    <main class="p-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">Agenda for <span id="currentDate"></span></h2>
+            <div>
+                <button id="prevDay" class="bg-gray-300 px-4 py-2 rounded">&larr; Previous</button>
+                <button id="nextDay" class="bg-gray-300 px-4 py-2 rounded">Next &rarr;</button>
+            </div>
+        </div>
+        <div id="appointmentsList" class="space-y-2">
+            <!-- Será preenchido via JavaScript -->
+        </div>
+
+        <!-- Seção de bloqueios -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-bold mb-4">Meus Bloqueios</h2>
+            <div id="blocksList" class="space-y-2">
+                <!-- Será preenchido via JavaScript -->
+            </div>
+        </div>
+    </main>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/professional.js') }}"></script>
+</body>
+</html>

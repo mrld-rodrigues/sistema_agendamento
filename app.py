@@ -51,6 +51,20 @@ def client_new_appointment():
     return render_template('client/new_appointment.html')
 
 
+# Páginas do profissional (protegidas por autenticação no frontend)
+@app.route('/professional/dashboard')
+def professional_dashboard():
+    return render_template('professional/dashboard.html')
+
+@app.route('/professional/settings')
+def professional_settings():
+    return render_template('professional/settings.html')
+
+@app.route('/professional/blocks')
+def professional_blocks():
+    return render_template('professional/blocked_days.html')
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, threaded=True)
