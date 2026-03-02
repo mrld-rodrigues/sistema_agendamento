@@ -7,6 +7,7 @@
     <title>Professional Dashboard</title>
 </head>
 <body class="bg-gray-100">
+    <!-- Barra de navegação -->
     <nav class="bg-white shadow p-4 flex justify-between items-center">
         <h1 class="text-xl font-bold">My Agenda</h1>
         <div>
@@ -15,26 +16,44 @@
             <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
         </div>
     </nav>
+
     <main class="p-4">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold">Agenda for <span id="currentDate"></span></h2>
-            <div>
-                <button id="prevDay" class="bg-gray-300 px-4 py-2 rounded">&larr; Previous</button>
-                <button id="nextDay" class="bg-gray-300 px-4 py-2 rounded">Next &rarr;</button>
+        <!-- Seção: Agenda do dia -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Agenda for <span id="currentDate"></span></h2>
+                <div>
+                    <button id="prevDay" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">&larr; Previous</button>
+                    <button id="nextDay" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Next &rarr;</button>
+                </div>
+            </div>
+            <div id="appointmentsList" class="space-y-2">
+                <!-- preenchido via JS -->
             </div>
         </div>
-        <div id="appointmentsList" class="space-y-2">
-            <!-- Será preenchido via JavaScript -->
-        </div>
 
-        <!-- Seção de bloqueios -->
+        <!-- Seção: Bloqueios -->
         <div class="mt-8">
             <h2 class="text-2xl font-bold mb-4">Meus Bloqueios</h2>
             <div id="blocksList" class="space-y-2">
-                <!-- Será preenchido via JavaScript -->
+                <!-- preenchido via JS -->
+            </div>
+        </div>
+
+        <!-- Seção: Agenda Semanal -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-bold mb-4">Agenda da Semana</h2>
+            <div class="flex justify-between items-center mb-4">
+                <button id="prevWeek" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">&larr; Semana anterior</button>
+                <span id="weekRange" class="font-semibold"></span>
+                <button id="nextWeek" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Próxima semana &rarr;</button>
+            </div>
+            <div id="weeklyAppointments" class="grid grid-cols-1 md:grid-cols-7 gap-2">
+                <!-- preenchido via JS -->
             </div>
         </div>
     </main>
+
     <script src="{{ url_for('static', filename='js/api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/professional.js') }}"></script>
 </body>

@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('professionalId').value = professionalId;
             document.getElementById('professionalIdTime').value = professionalId;
             document.getElementById('professionalIdRec').value = professionalId;
+            document.getElementById('professionalIdPeriod').value = professionalId;
             // Carrega a lista de bloqueios existentes
             loadBlocks();
         } catch (err) {
@@ -32,38 +33,103 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Carrega todos os bloqueios (dias e horários) do profissional e os exibe.
+     * Carrega todos os bloqueios (dias, horários e recorrentes) e os exibe na lista.
      */
     async function loadBlocks() {
         if (!professionalId) return;
         try {
-            const blocks = await apiFetch(`/bloqueios/todos?profissional_id=${professionalId}`);
+            const blocksData = await apiFetch(`/profissionais/${professionalId}/bloqueios`);
             const listDiv = document.getElementById('blocksList');
-            if (blocks.length === 0) {
-                listDiv.innerHTML = '<p class="text-gray-500">Nenhum bloqueio cadastrado.</p>';
-                return;
-            }
+            if (!listDiv) return;
+
             let html = '<ul class="space-y-2">';
-            blocks.forEach(block => {
-                let description = '';
-                if (block.tipo === 'dia') {
-                    description = `Dia inteiro: ${block.data} – ${block.motivo || 'sem motivo'}`;
-                } else if (block.tipo === 'horario') {
-                    description = `Horário: ${block.data} ${block.hora_inicio} às ${block.hora_fim} – ${block.motivo || 'sem motivo'}`;
-                }
-                html += `
-                    <li class="bg-gray-50 p-2 rounded flex justify-between items-center">
-                        <span>${description}</span>
-                        <button onclick="deleteBlock(${block.id}, '${block.tipo}')" class="text-red-500 hover:text-red-700">Excluir</button>
-                    </li>
-                `;
-            });
+
+            // Dias
+            if (blocksData.dias && blocksData.dias.length > 0) {
+                blocksData.dias.forEach(d => {
+                    html += `
+                        <li class="bg-gray-50 p-2 rounded flex justify-between items-center">
+                            <span>Dia inteiro: ${d.data} – ${d.motivo || 'sem motivo'}</span>
+                            <button onclick="deleteBlock(${d.id}, 'dia')" class="text-red-500 hover:text-red-700">Excluir</button>
+                        </li>
+                    `;
+                });
+            }
+
+            // Horários
+            if (blocksData.horarios && blocksData.horarios.length > 0) {
+                blocksData.horarios.forEach(h => {
+                    html += `
+                        <li class="bg-gray-50 p-2 rounded flex justify-between items-center">
+                            <span>Horário: ${h.data} ${h.hora_inicio} às ${h.hora_fim} – ${h.motivo || 'sem motivo'}</span>
+                            <button onclick="deleteBlock(${h.id}, 'horario')" class="text-red-500 hover:text-red-700">Excluir</button>
+                        </li>
+                    `;
+                });
+            }
+
+            // Recorrentes
+            if (blocksData.recorrentes && blocksData.recorrentes.length > 0) {
+                const diasSemana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+                blocksData.recorrentes.forEach(r => {
+                    const dia = diasSemana[r.dia_semana] || r.dia_semana;
+                    let periodo = '';
+                    if (r.data_inicio && r.data_fim) {
+                        periodo = ` (válido de ${r.data_inicio} até ${r.data_fim})`;
+                    } else if (r.data_inicio) {
+                        periodo = ` (válido a partir de ${r.data_inicio})`;
+                    } else if (r.data_fim) {
+                        periodo = ` (válido até ${r.data_fim})`;
+                    }
+                    html += `
+                        <li class="bg-gray-50 p-2 rounded flex justify-between items-center">
+                            <span>Recorrente: ${dia}, ${r.hora_inicio} às ${r.hora_fim} – ${r.motivo || 'sem motivo'}${periodo}</span>
+                            <button onclick="deleteRecurrentBlock(${r.id})" class="text-red-500 hover:text-red-700">Excluir</button>
+                        </li>
+                    `;
+                });
+            }
+
+            if (blocksData.dias?.length === 0 && blocksData.horarios?.length === 0 && blocksData.recorrentes?.length === 0) {
+                html += '<p class="text-gray-500">Nenhum bloqueio cadastrado.</p>';
+            }
+
             html += '</ul>';
             listDiv.innerHTML = html;
         } catch (err) {
             console.error('Erro ao carregar bloqueios:', err);
+            document.getElementById('blocksList').innerHTML = '<p class="text-red-500">Erro ao carregar bloqueios.</p>';
         }
     }
+
+    // Adicionar as funções de exclusão (se ainda não existirem)
+    window.deleteBlock = async function(id, tipo) {
+        if (!confirm('Tem certeza que deseja excluir este bloqueio?')) return;
+        try {
+            let endpoint = '';
+            if (tipo === 'dia') {
+                endpoint = `/bloqueios/apagar-dia/${id}`;
+            } else if (tipo === 'horario') {
+                endpoint = `/bloqueios/apagar-horario/${id}`;
+            } else {
+                return;
+            }
+            await apiFetch(endpoint, { method: 'DELETE' });
+            loadBlocks();
+        } catch (err) {
+            alert('Erro ao excluir bloqueio: ' + err.message);
+        }
+    };
+
+    window.deleteRecurrentBlock = async function(id) {
+        if (!confirm('Tem certeza que deseja excluir este bloqueio recorrente?')) return;
+        try {
+            await apiFetch(`/bloqueios/recorrente/${id}`, { method: 'DELETE' });
+            loadBlocks();
+        } catch (err) {
+            alert('Erro ao excluir bloqueio recorrente: ' + err.message);
+        }
+    };
 
     /**
      * Função global para excluir um bloqueio.
@@ -160,6 +226,32 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('recurringEndDate').value = '';
             document.getElementById('recurringReason').value = '';
             // Não recarrega a lista porque recorrentes não aparecem em /todos
+        } catch (err) {
+            alert('Erro: ' + err.message);
+        }
+    });
+
+
+    // Formulário: Bloquear período (férias)
+    document.getElementById('periodBlockForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            profissional_id: professionalId,
+            data_inicio: document.getElementById('periodStart').value,
+            data_fim: document.getElementById('periodEnd').value,
+            motivo: document.getElementById('periodReason').value
+        };
+        try {
+            await apiFetch('/bloqueios/bloquear-periodo', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            alert('Período bloqueado com sucesso!');
+            document.getElementById('periodStart').value = '';
+            document.getElementById('periodEnd').value = '';
+            document.getElementById('periodReason').value = '';
+            // Recarrega a lista de bloqueios (dias) para mostrar os novos dias
+            loadBlocks(); // função já existente que recarrega a lista de bloqueios (dias e horários)
         } catch (err) {
             alert('Erro: ' + err.message);
         }

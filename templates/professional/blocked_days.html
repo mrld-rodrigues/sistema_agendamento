@@ -95,6 +95,28 @@
                 <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Create Recurring Block</button>
             </form>
         </div>
+
+        <!-- Formulário para Férias / Período -->
+        <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-xl font-bold mb-4">Férias / Período</h2>
+            <form id="periodBlockForm">
+                <input type="hidden" id="professionalIdPeriod" value="">
+                <div class="mb-2">
+                    <label class="block">Data início</label>
+                    <input type="date" id="periodStart" required class="w-full border rounded px-2 py-1">
+                </div>
+                <div class="mb-2">
+                    <label class="block">Data fim</label>
+                    <input type="date" id="periodEnd" required class="w-full border rounded px-2 py-1">
+                </div>
+                <div class="mb-2">
+                    <label class="block">Motivo (opcional)</label>
+                    <input type="text" id="periodReason" class="w-full border rounded px-2 py-1">
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Bloquear Período</button>
+            </form>
+        </div>
+        
         <!-- Lista de bloqueios existentes -->
         <div class="bg-white p-4 rounded shadow md:col-span-2">
             <h2 class="text-xl font-bold mb-4">Existing Blocks</h2>
