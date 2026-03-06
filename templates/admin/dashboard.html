@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Admin Dashboard</title>
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar superior com links para as seções admin -->
+    <nav class="bg-white shadow p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">Admin Panel</h1>
+        <div>
+            <a href="/admin/dashboard" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2">Dashboard</a>
+            <a href="/admin/clients" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2">Clients</a>
+            <a href="/admin/professionals" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2">Professionals</a>
+            <a href="/admin/services" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2">Services</a>
+            <a href="/admin/appointments" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2">Appointments</a>
+            <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Conteúdo principal -->
+    <main class="p-4">
+        <h2 class="text-2xl font-bold mb-6">Dashboard Overview</h2>
+
+        <!-- Grid de cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Card: Agendamentos hoje -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold text-gray-700">Agendamentos Hoje</h3>
+                <p id="todayAppointments" class="text-3xl font-bold text-blue-600">-</p>
+            </div>
+            <!-- Card: Agendamentos no mês -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold text-gray-700">Agendamentos no Mês</h3>
+                <p id="monthAppointments" class="text-3xl font-bold text-green-600">-</p>
+            </div>
+            <!-- Card: Total de Clientes -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold text-gray-700">Total de Clientes</h3>
+                <p id="totalClients" class="text-3xl font-bold text-purple-600">-</p>
+            </div>
+            <!-- Card: Profissionais Ativos -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold text-gray-700">Profissionais Ativos</h3>
+                <p id="activeProfessionals" class="text-3xl font-bold text-orange-600">-</p>
+            </div>
+            <!-- Card: Serviços Ativos -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold text-gray-700">Serviços Ativos</h3>
+                <p id="activeServices" class="text-3xl font-bold text-red-600">-</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin/admin.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin/dashboard.js') }}"></script>
+</body>
+</html>

@@ -81,3 +81,16 @@ class ServicoDAO:
         conn.close()
         return affected > 0
 
+
+    @staticmethod
+    def contar_ativos():
+        """Retorna o número de serviços com ativo = 1."""
+        conn = get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT COUNT(*) FROM servicos WHERE ativo = 1")
+            result = cursor.fetchone()
+            return result[0] if result else 0
+        finally:
+            cursor.close()
+            conn.close()

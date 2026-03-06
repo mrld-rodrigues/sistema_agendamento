@@ -77,3 +77,17 @@ class ClienteDAO:
         cursor.close()
         conn.close()
         return affected > 0
+
+
+    @staticmethod
+    def contar():
+        """Retorna o número total de clientes cadastrados."""
+        conn = get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT COUNT(*) FROM clientes")
+            result = cursor.fetchone()
+            return result[0] if result else 0
+        finally:
+            cursor.close()
+            conn.close()

@@ -1,7 +1,10 @@
 from flask import Blueprint, request, jsonify
+from dao.client_dao import ClienteDAO
+from dao.professional_dao import ProfissionalDAO
 from dao.scheduling_dao import AgendamentoDAO
 from dao.blocked_dao import BloqueioDAO
 from datetime import datetime
+from dao.service_dao import ServicoDAO
 from services.horarios_livres_services import HorariosLivresService
 from utils.decorators import admin_required
 from flask_jwt_extended import jwt_required
@@ -242,3 +245,70 @@ def admin_deletar_bloqueio_recorrente(bloqueio_id):
         return jsonify({"mensagem": "Bloqueio recorrente removido com sucesso"})
     except Exception as e:
         return jsonify({"erro": f"Erro ao deletar bloqueio recorrente: {str(e)}"}), 500
+    
+
+@admin_bp.route('/status/agendamentos-hoje', methods=['GET'])
+@jwt_required()
+@admin_required
+def status_agendamentos_hoje():
+    """
+    Retorna o número de agendamentos para a data atual.
+    """
+    try:
+        total = AgendamentoDAO.contar_hoje()
+        return jsonify({'total': total}), 200
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+    
+
+@admin_bp.route('/status/agendamentos-mes', methods=['GET'])
+@jwt_required()
+@admin_required
+def status_agendamentos_mes():
+    """
+    Retorna o número de agendamentos no mês atual.
+    """
+    try:
+        total = AgendamentoDAO.contar_mes()
+        return jsonify({'total': total}), 200
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+@admin_bp.route('/status/clientes', methods=['GET'])
+@jwt_required()
+@admin_required
+def status_clientes():
+    """
+    Retorna o total de clientes cadastrados.
+    """
+    try:
+        total = ClienteDAO.contar()
+        return jsonify({'total': total}), 200
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+@admin_bp.route('/status/profissionais', methods=['GET'])
+@jwt_required()
+@admin_required
+def status_profissionais():
+    """
+    Retorna o total de profissionais ativos.
+    """
+    try:
+        total = ProfissionalDAO.contar_ativos()
+        return jsonify({'total': total}), 200
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+@admin_bp.route('/status/servicos', methods=['GET'])
+@jwt_required()
+@admin_required
+def status_servicos():
+    """
+    Retorna o total de serviços ativos.
+    """
+    try:
+        total = ServicoDAO.contar_ativos()
+        return jsonify({'total': total}), 200
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500

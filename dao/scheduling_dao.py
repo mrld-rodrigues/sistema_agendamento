@@ -351,4 +351,49 @@ class AgendamentoDAO:
         return conflito is not None
         
 
-    
+    @staticmethod
+    def contar_hoje(profissional_id=None):
+        """
+        Retorna o número de agendamentos para a data atual.
+        Se profissional_id for fornecido, conta apenas desse profissional.
+        Caso contrário, conta todos.
+        """
+        conn = get_connection()
+        cursor = conn.cursor()
+        try:
+            query = "SELECT COUNT(*) FROM agendamentos WHERE DATE(data_hora) = CURDATE()"
+            params = []
+            if profissional_id:
+                query += " AND profissional_id = %s"
+                params.append(profissional_id)
+            cursor.execute(query, params)
+            result = cursor.fetchone()
+            return result[0] if result else 0
+        finally:
+            cursor.close()
+            conn.close()
+
+    @staticmethod
+    def contar_mes(profissional_id=None):
+        """
+        Retorna o número de agendamentos no mês atual.
+        Se profissional_id for fornecido, conta apenas desse profissional.
+        """
+        conn = get_connection()
+        cursor = conn.cursor()
+        try:
+            base_query = """
+                SELECT COUNT(*) FROM agendamentos 
+                WHERE YEAR(data_hora) = YEAR(CURDATE()) 
+                AND MONTH(data_hora) = MONTH(CURDATE())
+            """
+            params = []
+            if profissional_id is not None:
+                base_query += " AND profissional_id = %s"
+                params.append(profissional_id)
+            cursor.execute(base_query, params)
+            result = cursor.fetchone()
+            return result[0] if result else 0
+        finally:
+            cursor.close()
+            conn.close()
