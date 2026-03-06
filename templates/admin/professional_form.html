@@ -50,6 +50,12 @@
                         <option value="0">Não</option>
                     </select>
                 </div>
+                {% if not profissional_id %}
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Senha *</label>
+                    <input type="password" id="senha" required class="w-full border rounded px-3 py-2">
+                </div>
+                {% endif %}
                 <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
                     {{ 'Salvar' if profissional_id else 'Criar' }}
                 </button>

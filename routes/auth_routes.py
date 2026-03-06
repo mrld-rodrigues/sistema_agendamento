@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from utils.decorators import admin_required
 from dao.user_dao import UsuarioDAO
 from dao.client_dao import ClienteDAO
 from dao.professional_dao import ProfissionalDAO
@@ -75,6 +76,8 @@ def registro_cliente():
 
 # Rota para registrar um profissional (apenas admin pode criar?)
 @auth_bp.route('/registro/profissional', methods=['POST'])
+@jwt_required()
+@admin_required
 def registro_profissional():
     # Idealmente, apenas admin pode criar profissional. Mas vamos simplificar por enquanto.
     dados = request.get_json()

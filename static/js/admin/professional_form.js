@@ -46,20 +46,23 @@ async function salvarProfissional(e) {
 
     try {
         if (profissionalId) {
+            // Edição: usa PUT /profissionais/{id}
             await apiFetch(`/profissionais/${profissionalId}`, {
                 method: 'PUT',
                 body: JSON.stringify(payload)
             });
-            alert('Profissional atualizado com sucesso!');
+            showToast('Profissional atualizado com sucesso!', 'success');
         } else {
-            await apiFetch('/profissionais', {
+            // Criação: inclui senha e usa POST /auth/registro/profissional
+            payload.senha = document.getElementById('senha').value;
+            await apiFetch('/auth/registro/profissional', {
                 method: 'POST',
                 body: JSON.stringify(payload)
             });
-            alert('Profissional criado com sucesso!');
+            showToast('Profissional criado com sucesso!', 'success');
         }
         window.location.href = '/admin/professionals';
     } catch (err) {
-        alert('Erro ao salvar profissional: ' + err.message);
+        showToast('Erro ao salvar profissional: ' + err.message, 'error');
     }
 }

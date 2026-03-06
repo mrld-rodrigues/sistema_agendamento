@@ -120,6 +120,11 @@ def admin_service_edit(id):
 def admin_appointments():
     return render_template('admin/appointments.html')
 
+# Bloqueios (Admin)
+@app.route('/admin/blocks')
+def admin_blocks():
+    return render_template('admin/blocks.html')
+
 
 
 if __name__ == "__main__":
