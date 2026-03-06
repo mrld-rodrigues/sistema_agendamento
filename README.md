@@ -1,192 +1,97 @@
-<h2>Appointment System API</h2>
+(The file `/home/mrldrodor/Documentos/mrld_projetos/sistema_agendamento/README.md` exists, but is empty)
 
-Sistema de agendamentos completo desenvolvido com Flask e MySQL, oferecendo autenticação JWT, gerenciamento de clientes, profissionais, serviços, agendamentos e bloqueios. Ideal para portfólio demonstrando boas práticas de desenvolvimento backend.
+# Sistema de Agendamento (API)
 
-<h4>Funcionalidades</h4>
+API simples para gerenciamento de clientes, profissionais, serviços e agendamentos.
 
-    Autenticação: Registro e login de clientes, profissionais e administradores com JWT.
+## Visão geral
 
-    Clientes: CRUD completo, com permissões baseadas em tipo de usuário.
+Aplicação Flask que expõe endpoints para autenticação (JWT), gerenciamento de clientes, profissionais, serviços, agendamentos, bloqueios e rotas administrativas. Também serve um frontend básico nas rotas HTML em `templates/`.
 
-    Profissionais: CRUD completo, com campo de intervalo entre atendimentos (buffer).
+## Requisitos
 
-    Serviços: CRUD completo, com duração e preço.
+- Python 3.8+
+- Dependências em `requeriments.txt` (instale com `pip install -r requeriments.txt`).
 
-    Agendamentos: Criação, listagem, remarcação e cancelamento, com verificação de conflitos (incluindo buffer e bloqueios).
+## Instalação rápida
 
-    Bloqueios: Dias inteiros, horários específicos, períodos e bloqueios recorrentes (semanais).
+1. Criar e ativar um ambiente virtual:
 
-    Horários livres: Cálculo inteligente baseado em jornada de trabalho, agendamentos e bloqueios.
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
 
-    Permissões: Rotas protegidas por tipo de usuário (cliente, profissional, admin).
+2. Instalar dependências:
 
-<h4>Tecnologias</h4>
+```bash
+pip install -r requeriments.txt
+```
 
-    Backend: Flask, Flask-JWT-Extended, bcrypt
+## Configuração (variáveis de ambiente)
 
-    Banco de dados: MySQL (MariaDB)
+Defina as variáveis antes de rodar a aplicação:
 
-    Outras: python-dotenv, mysql-connector-python
+- `DB_HOST` — host do banco de dados (MySQL/MariaDB)
+- `DB_NAME` — nome do banco de dados
+- `DB_USER` — usuário do banco
+- `DB_PASSWORD` — senha do banco
+- `DB_PORT` — porta (opcional, padrão 3306)
+- `JWT_SECRET_KEY` — chave secreta para JWT (opcional; há um valor padrão de desenvolvimento)
 
-<h4>Estrutura de Diretórios</h4>
+Exemplo (Linux/macOS):
 
-.<br>
-├── app.py # Ponto de entrada da aplicação<br>
-├── utils/ # Configurações (banco de dados, JWT) Decoradores de permissão (admin_required, etc.)<br>
-│ ├── config.py<br>
-│ └── decorators.py<br>
-├── dao/ # Data Access Objects<br>
-│ ├── blocked_dao.py<br>
-│ ├── client_dao.py<br>
-│ ├── professional_dao.py<br>
-│ ├── scheduling_dao.py<br>
-│ ├── service_dao.py<br>
-│ ├── user_dao.py<br>
-│ └── worktime_dao.py<br>
-├── database/<br>
-│ └── connection.py # Conexão com o banco<br>
-├── routes/ # Blueprints<br>
-│ ├── admin_routes.py<br>
-│ ├── auth_routes.py<br>
-│ ├── blocked_routes.py<br>
-│ ├── clients_routes.py<br>
-│ ├── professionals_routes.py<br>
-│ ├── scheduling_routes.py<br>
-│ └── services_routes.py<br>
-├── services/ # Lógica de negócio<br>
-│ └── horarios_livres_services.py<br>
-├── static/ # Frontend (CSS/JS)<br>
-│ ├── css/<br>
-│ └── js/<br>
-├── templates/ # Páginas HTML<br>
-│ ├── auth/<br>
-│ ├── client/<br>
-│ ├── index.html<br>
-│ └── ...<br>
-└── .env # Variáveis de ambiente<br>
+```bash
+export DB_HOST=localhost
+export DB_NAME=sistema_agendamento
+export DB_USER=root
+export DB_PASSWORD=senha
+export JWT_SECRET_KEY=minha_chave_secreta
+```
 
-<h4>Configuração do Ambiente</h4><br>
-Pré-requisitos
+## Rodando a aplicação
 
-    Python 3.9+
+Com o ambiente ativado e variáveis definidas, execute:
 
-    MySQL/MariaDB
-
-    pip e virtualenv (recomendado)
-
-<h4>Passo a passo</h4>
-
-Clone o repositório
-
-git clone https://github.com/seu-usuario/appointment-system.git
-cd appointment-system
-
-Crie e ative um ambiente virtual
-bash
-
-python -m venv venv
-source venv/bin/activate # Linux/macOS
-venv\Scripts\activate # Windows
-
-Instale as dependências
-bash
-
-pip install -r requirements.txt
-
-<h4>Configure o banco de dados</h4>
-
-    Crie um banco de dados MySQL (ex.: sistema_agendamento).
-
-    Execute o script database/schema.sql (se disponível) ou importe o dump fornecido.
-
-    Copie o arquivo .env.example para .env e ajuste as credenciais:
-    text
-
-DB_HOST=localhost<br>
-DB_NAME=sistema_agendamento<br>
-DB_USER=root<br>
-DB_PASSWORD=sua_senha<br>
-DB_PORT=3306<br>
-JWT_SECRET_KEY=uma_chave_secreta_forte_com_pelo_menos_32_caracteres<br>
-
-<h4>Execute a aplicação</h4>
-
+```bash
 python app.py
+```
 
-    O servidor estará disponível em http://localhost:5000.
+Por padrão a aplicação roda em modo de desenvolvimento (`debug=True`).
 
-<h4>Endpoints Principais</h4><br>
-Método | Rota | Descrição | Permissão<br>
-POST /auth/login Login Pública<br>
-POST /auth/registro/cliente Registro de cliente Pública<br>
-GET /auth/me Dados do usuário logado Qualquer token<br>
-POST /clientes Criar cliente Admin<br>
-GET /clientes Listar clientes Admin<br>
-GET /clientes/<id> Buscar cliente Admin ou próprio<br>
-PUT /clientes/<id> Atualizar cliente Admin ou próprio<br>
-DELETE /clientes/<id> Deletar cliente Admin<br>
-POST /profissionais Criar profissional Admin<br>
-GET /profissionais Listar profissionais Pública<br>
-GET /profissionais/<id> Buscar profissional Pública<br>
-PUT /profissionais/<id> Atualizar profissional Admin ou próprio<br>
-DELETE /profissionais/<id> Deletar profissional Admin<br>
-POST /servicos Criar serviço Admin<br>
-GET /servicos Listar serviços Pública<br>
-GET /servicos/<id> Buscar serviço Pública<br>
-PUT /servicos/<id> Atualizar serviço Admin<br>
-DELETE /servicos/<id> Deletar serviço Admin<br>
-POST /agendamentos Criar agendamento Cliente (próprio) ou admin<br>
-GET /agendamentos Listar agendamentos (filtro) Profissional (seus) ou admin<br>
-GET /agendamentos/horarios-livres Horários livres Pública<br>
-DELETE /agendamentos/<id> Deletar agendamento Admin, profissional (dono) ou cliente (dono)<br>
-POST /bloqueios/bloquear-dia Bloquear dia Profissional (próprio) ou admin<br>
-POST /bloqueios/bloquear-horario Bloquear horário Profissional (próprio) ou admin<br>
-POST /bloqueios/recorrente Criar bloqueio recorrente Profissional (próprio) ou admin<br>
-GET /bloqueios/todos Listar todos os bloqueios Profissional (seus) ou admin<br>
-<br>
-<h4>Exemplos de Uso (curl)</h4>
+## Endpoints principais
 
-Login como cliente
+- `POST /auth/login` — autenticação (recebe `email` e `senha`, retorna `access_token`).
+- `GET /auth/me` — retorna dados do usuário autenticado (JWT requerido).
+- `POST /auth/registro/cliente` — registra cliente + usuário.
+- `POST /auth/registro/profissional` — registra profissional + usuário.
 
-curl -X POST http://localhost:5000/auth/login \
- -H "Content-Type: application/json" \
- -d '{"email": "joao@email.com", "senha": "123456"}'
+Blueprints (prefixos de API):
 
-Criar agendamento (com token)
+- `/clientes` — endpoints de clientes
+- `/profissionais` — endpoints de profissionais
+- `/servicos` — endpoints de serviços
+- `/agendamentos` — endpoints de agendamentos
+- `/admin` — endpoints administrativos
+- `/bloqueios` — gerenciamento de dias/horários bloqueados
 
-curl -X POST http://localhost:5000/agendamentos \
- -H "Authorization: Bearer SEU_TOKEN" \
- -H "Content-Type: application/json" \
- -d '{
-"cliente_id": 1,
-"profissional_id": 1,
-"servico_id": 1,
-"data_hora": "2026-03-20 09:00:00"
-}'
+Observação: muitas rotas exigem JWT (token) para operações protegidas.
 
-<h4>Frontend (opcional)</h4>
+## Banco de dados
 
-O projeto inclui um frontend simples servido pelo próprio Flask, localizado nas pastas templates/ e static/. Para acessar:
+O projeto usa MySQL/MariaDB via `mysql-connector-python`. A conexão é configurada em `utils/config.py` e usada em `database/connection.py`.
 
-    Página inicial: http://localhost:5000/
+## Estrutura resumida
 
-    Login: http://localhost:5000/auth/login
+- `app.py` — ponto de entrada e registro de blueprints
+- `routes/` — blueprints das rotas (auth, clientes, profissionais, etc.)
+- `dao/` — acesso a dados (CRUD para entidades)
+- `templates/` e `static/` — frontend servido pela app
+- `utils/` — configurações e decoradores
 
-    Dashboard do cliente: http://localhost:5000/client/dashboard
+## Observações finais
 
-O frontend utiliza Tailwind CSS para estilização e JavaScript puro para consumo da API.
-Próximos Passos / Melhorias Futuras
+- Este README é um guia rápido. Para detalhes sobre cada endpoint consulte os arquivos em `routes/` e os DAOs em `dao/`.
+- Para produção, ajuste `JWT_SECRET_KEY`, desative `debug` e use um servidor WSGI (gunicorn/uwsgi) e TLS/SSL.
 
-    Implementar refresh tokens
-
-    Adicionar testes automatizados (pytest)
-
-    Documentação com Swagger/OpenAPI
-
-    Deploy em produção com Docker e nginx
-
-Licença
-
-Este projeto está sob a licença MIT. Sinta-se à vontade para usar e modificar.
-
-Desenvolvido como projeto de portfólio para demonstrar habilidades em desenvolvimento backend com Flask e boas práticas de arquitetura.
+---
