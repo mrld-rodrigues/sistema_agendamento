@@ -1,5 +1,3 @@
-(The file `/home/mrldrodor/Documentos/mrld_projetos/sistema_agendamento/README.md` exists, but is empty)
-
 # Sistema de Agendamento (API)
 
 API simples para gerenciamento de clientes, profissionais, serviços e agendamentos.
