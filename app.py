@@ -76,6 +76,7 @@ def professional_blocks():
 def admin_dashboard():
     return render_template('admin/dashboard.html')
 
+# clientes (Admin)
 @app.route('/admin/clients')
 def admin_clients():
     return render_template('admin/clients.html')
@@ -88,49 +89,37 @@ def admin_client_new():
 def admin_client_edit(id):
     return render_template('admin/client_form.html', client_id=id)
 
+# profissionais (Admin)
+@app.route('/admin/professionals')
+def admin_professionals():
+    return render_template('admin/professionals.html')
 
-# -------------------- CLIENTES (Admin) --------------------
-@admin_bp.route('/clients', methods=['GET'])
-@jwt_required()
-@admin_required
-def listar_clientes_admin():
-    """Retorna a lista de todos os clientes (para admin)."""
-    try:
-        clientes = ClienteDAO.listar()
-        return jsonify(clientes), 200
-    except Exception as e:
-        return jsonify({'erro': str(e)}), 500
+@app.route('/admin/professionals/new')
+def admin_professional_new():
+    return render_template('admin/professional_form.html')
 
-# -------------------- PROFISSIONAIS (Admin) --------------------
-@admin_bp.route('/professionals', methods=['GET'])
-@jwt_required()
-@admin_required
-def listar_profissionais_admin():
-    """Retorna a lista de todos os profissionais (para admin)."""
-    try:
-        # Por padrão, listar apenas ativos? Admin pode querer ver todos.
-        # Vamos permitir passar um parâmetro para incluir inativos.
-        incluir_inativos = request.args.get('incluir_inativos', 'false').lower() == 'true'
-        apenas_ativos = not incluir_inativos
-        profissionais = ProfissionalDAO.listar(apenas_ativos=apenas_ativos)
-        return jsonify(profissionais), 200
-    except Exception as e:
-        return jsonify({'erro': str(e)}), 500
+@app.route('/admin/professionals/<int:id>/edit')
+def admin_professional_edit(id):
+    return render_template('admin/professional_form.html', profissional_id=id)
 
-# -------------------- SERVIÇOS (Admin) --------------------
-@admin_bp.route('/services', methods=['GET'])
-@jwt_required()
-@admin_required
-def listar_servicos_admin():
-    """Retorna a lista de todos os serviços (para admin)."""
-    try:
-        incluir_inativos = request.args.get('incluir_inativos', 'false').lower() == 'true'
-        apenas_ativos = not incluir_inativos
-        servicos = ServicoDAO.listar(apenas_ativos=apenas_ativos)
-        return jsonify(servicos), 200
-    except Exception as e:
-        return jsonify({'erro': str(e)}), 500
-    
+# Serviços (Admin)
+@app.route('/admin/services')
+def admin_services():
+    return render_template('admin/services.html')
+
+@app.route('/admin/services/new')
+def admin_service_new():
+    return render_template('admin/service_form.html')
+
+@app.route('/admin/services/<int:id>/edit')
+def admin_service_edit(id):
+    return render_template('admin/service_form.html', servico_id=id)
+
+# Agendamentos (Admin)
+@app.route('/admin/appointments')
+def admin_appointments():
+    return render_template('admin/appointments.html')
+
 
 
 if __name__ == "__main__":

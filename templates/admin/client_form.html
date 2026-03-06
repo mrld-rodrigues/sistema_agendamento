@@ -18,10 +18,12 @@
 
     <main class="p-4 max-w-lg mx-auto">
         <div class="bg-white p-6 rounded shadow">
-            <h2 class="text-2xl font-bold mb-4" id="form-title">New Client</h2>
+            <h2 class="text-2xl font-bold mb-4" id="form-title">
+                {% if client_id %}Editar Cliente{% else %}Novo Cliente{% endif %}
+            </h2>
             <form id="clientForm">
                 <!-- Campo oculto para armazenar o ID do cliente (quando editando) -->
-                <input type="hidden" id="clientId" value="">
+                <input type="hidden" id="clientId" value="{{ client_id or '' }}">
 
                 <div class="mb-4">
                     <label class="block text-gray-700 mb-2">Name *</label>

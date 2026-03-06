@@ -1,36 +1,30 @@
 /**
- * admin.js – Lógica base para todas as páginas administrativas.
- * 
- * Funções:
- * - checkAdmin(): verifica se o usuário é admin e redireciona se não for.
- * - loadNavbar(): carrega a barra de navegação comum a todas as páginas admin.
- * - logout(): já herdado de api.js, mas mantido para consistência.
+ * admin.js – Lógica comum para todas as páginas administrativas.
+ * Verifica se o usuário está autenticado e se é administrador.
+ * Redireciona para o dashboard apropriado caso contrário.
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Primeiro, verifica se há um token (autenticação básica)
+document.addEventListener('DOMContentLoaded', async function() {
+    // Primeiro, verifica se há token (autenticação básica)
     checkAuth();
 
-    // Em seguida, verifica se o usuário é administrador
-    checkAdmin();
-});
-
-/**
- * Verifica se o usuário logado é do tipo 'admin'.
- * Se não for, redireciona para o dashboard apropriado (cliente ou profissional).
- * Se for admin, continua o carregamento da página.
- */
-async function checkAdmin() {
     try {
+        // Obtém dados do usuário logado
         const user = await apiFetch('/auth/me');
+        
+        // Se não for admin, redireciona para o dashboard correspondente
         if (user.tipo !== 'admin') {
-            // Redireciona para o dashboard correto baseado no tipo
-            redirectByType(); // função definida em api.js
+            redirectByType(); // redireciona para cliente ou profissional
+            return; // não executa o resto
         }
-        // Se for admin, não faz nada (pode carregar a página)
+        
+        // Se for admin, a página pode carregar normalmente
+        console.log('Acesso admin autorizado para:', user.email);
+        
     } catch (err) {
-        console.error('Erro ao verificar tipo de usuário:', err);
-        // Em caso de erro (ex: token inválido), faz logout
+        console.error('Erro ao verificar permissões de admin:', err);
+        // Se houver erro (ex: token expirado), o apiFetch já redireciona para login
+        // Mas podemos garantir:
         logout();
     }
-}
+});

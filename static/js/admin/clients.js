@@ -1,22 +1,27 @@
 /**
- * admin/clientes.js – Lógica da página de listagem de clientes (admin).
- * Carrega a lista de clientes via API e exibe em tabela.
+ * clients.js – Lógica da página de listagem de clientes (admin).
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // As funções checkAuth e checkAdmin já são chamadas no admin.js
-    // Agora carregamos a lista de clientes
+    // A verificação de admin já é feita no admin.js, então apenas carregamos os clientes.
     carregarClientes();
 });
 
 async function carregarClientes() {
     try {
-        const clientes = await apiFetch('/admin/clients');
+        // A função apiFetch já lida com token e redirecionamento 401
+        const clientes = await apiFetch('/admin/api/clientes');  // URL corrigida
         const tbody = document.getElementById('clientesTableBody');
+        if (!tbody) {
+            console.error('Elemento #clientesTableBody não encontrado');
+            return;
+        }
+
         if (clientes.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nenhum cliente cadastrado.</td></tr>';
             return;
         }
+
         let html = '';
         clientes.forEach(cliente => {
             html += `
@@ -35,12 +40,15 @@ async function carregarClientes() {
         tbody.innerHTML = html;
     } catch (err) {
         console.error('Erro ao carregar clientes:', err);
-        alert('Erro ao carregar clientes.');
+        // Se o erro for de sessão expirada, apiFetch já redireciona.
+        // Caso contrário, mostramos uma mensagem amigável.
+        if (!err.message.includes('Sessão expirada')) {
+            alert('Erro ao carregar clientes: ' + err.message);
+        }
     }
 }
 
-function editarCliente(id) {
-    // Redireciona para a página de edição (criaremos depois)
+async function editarCliente(id) {
     window.location.href = `/admin/clients/${id}/edit`;
 }
 
@@ -54,7 +62,3 @@ async function excluirCliente(id) {
         alert('Erro ao excluir cliente: ' + err.message);
     }
 }
-
-document.getElementById('novoClienteBtn').addEventListener('click', () => {
-    window.location.href = '/admin/clients/new';
-});

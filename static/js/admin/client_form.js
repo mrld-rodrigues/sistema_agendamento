@@ -1,20 +1,21 @@
 /**
  * client_form.js – Lógica do formulário de criação/edição de clientes.
- * 
- * Funções:
- * - loadClientData(): se estiver editando, carrega os dados do cliente e preenche o formulário.
- * - saveClient(): envia os dados para a API (POST ou PUT conforme o caso).
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Verifica se há um ID na URL (modo edição)
+    // Obtém o caminho da URL
     const pathParts = window.location.pathname.split('/');
-    const clientId = pathParts[3] === 'edit' ? pathParts[2] : null; // Ex: /admin/clients/5/edit
+    const last = pathParts[pathParts.length - 1];
+    const secondLast = pathParts[pathParts.length - 2];
 
-    if (clientId) {
+    // Verifica se é modo edição (URL termina com '/edit' e o penúltimo é um número)
+    if (last === 'edit' && !isNaN(secondLast)) {
+        const clientId = secondLast;
         document.getElementById('form-title').textContent = 'Edit Client';
         document.getElementById('clientId').value = clientId;
         loadClientData(clientId);
+    } else {
+        document.getElementById('form-title').textContent = 'New Client';
     }
 
     document.getElementById('clientForm').addEventListener('submit', saveClient);
@@ -51,17 +52,16 @@ async function saveClient(e) {
     };
 
     try {
-        let response;
         if (clientId) {
             // Edição: PUT /clientes/{id}
-            response = await apiFetch(`/clientes/${clientId}`, {
+            await apiFetch(`/clientes/${clientId}`, {
                 method: 'PUT',
                 body: JSON.stringify(payload)
             });
             alert('Client updated successfully!');
         } else {
             // Criação: POST /clientes
-            response = await apiFetch('/clientes', {
+            await apiFetch('/clientes', {
                 method: 'POST',
                 body: JSON.stringify(payload)
             });

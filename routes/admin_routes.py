@@ -312,3 +312,44 @@ def status_servicos():
         return jsonify({'total': total}), 200
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
+ 
+
+# -------------------- CLIENTES (Admin) --------------------
+@admin_bp.route('/api/clientes', methods=['GET'])  # <-- barra no início
+@jwt_required()
+@admin_required
+def listar_clientes_admin():
+    """Retorna a lista de todos os clientes (para admin)."""
+    try:
+        clientes = ClienteDAO.listar()
+        return jsonify(clientes), 200
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+# -------------------- PROFISSIONAIS (Admin) --------------------
+@admin_bp.route('/api/profissionais', methods=['GET'])  # <-- movido para /api
+@jwt_required()
+@admin_required
+def listar_profissionais_admin():
+    """Retorna a lista de todos os profissionais (para admin)."""
+    try:
+        incluir_inativos = request.args.get('incluir_inativos', 'false').lower() == 'true'
+        apenas_ativos = not incluir_inativos
+        profissionais = ProfissionalDAO.listar(apenas_ativos=apenas_ativos)
+        return jsonify(profissionais), 200
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+# -------------------- SERVIÇOS (Admin) --------------------
+@admin_bp.route('/api/servicos', methods=['GET'])  # <-- movido para /api
+@jwt_required()
+@admin_required
+def listar_servicos_admin():
+    """Retorna a lista de todos os serviços (para admin)."""
+    try:
+        incluir_inativos = request.args.get('incluir_inativos', 'false').lower() == 'true'
+        apenas_ativos = not incluir_inativos
+        servicos = ServicoDAO.listar(apenas_ativos=apenas_ativos)
+        return jsonify(servicos), 200
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
