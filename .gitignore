@@ -1,0 +1,48 @@
+# Ambiente virtual (pasta onde as dependências são instaladas)
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Arquivos de cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Arquivos de configuração local (contém senhas, chaves, etc.)
+.env
+.env.local
+.flaskenv
+
+# Banco de dados SQLite (se você usar algum, mas no caso é MySQL, mantemos por precaução)
+*.db
+*.sqlite
+*.sqlite3
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Arquivos de log
+*.log
+instance/
+logs/
+
+# Arquivos de distribuição / build
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
