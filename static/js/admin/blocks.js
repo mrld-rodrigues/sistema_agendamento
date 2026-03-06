@@ -31,7 +31,7 @@ async function carregarBloqueios() {
 
         // Dias
         if (dados.dias && dados.dias.length > 0) {
-            html += '<h4 class="font-semibold mt-2">Dias inteiros:</h4><ul>';
+            html += '<h4 class="font-semibold mt-2">Dias inteiros:</h4><ul class="list-disc pl-5">';
             dados.dias.forEach(d => {
                 html += `<li>${d.data} – ${d.motivo || 'sem motivo'} 
                     <button onclick="excluirBloqueio('dia', ${d.id})" class="text-red-500 hover:text-red-700 ml-2">Excluir</button>
@@ -42,7 +42,7 @@ async function carregarBloqueios() {
 
         // Horários
         if (dados.horarios && dados.horarios.length > 0) {
-            html += '<h4 class="font-semibold mt-2">Horários:</h4><ul>';
+            html += '<h4 class="font-semibold mt-2">Horários:</h4><ul class="list-disc pl-5">';
             dados.horarios.forEach(h => {
                 html += `<li>${h.data} ${h.hora_inicio} às ${h.hora_fim} – ${h.motivo || 'sem motivo'}
                     <button onclick="excluirBloqueio('horario', ${h.id})" class="text-red-500 hover:text-red-700 ml-2">Excluir</button>
@@ -53,7 +53,7 @@ async function carregarBloqueios() {
 
         // Recorrentes
         if (dados.recorrentes && dados.recorrentes.length > 0) {
-            html += '<h4 class="font-semibold mt-2">Recorrentes:</h4><ul>';
+            html += '<h4 class="font-semibold mt-2">Recorrentes:</h4><ul class="list-disc pl-5">';
             const diasSemana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
             dados.recorrentes.forEach(r => {
                 const dia = diasSemana[r.dia_semana] || r.dia_semana;

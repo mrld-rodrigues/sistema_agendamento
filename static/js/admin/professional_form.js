@@ -3,9 +3,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Extrai o ID da URL no formato /admin/professionals/5/edit
     const pathParts = window.location.pathname.split('/');
-    // pathParts = ["", "admin", "professionals", "5", "edit"]
     const profissionalId = pathParts.length >= 4 && pathParts[3] !== 'new' ? pathParts[3] : null;
 
     if (profissionalId) {
@@ -27,7 +25,7 @@ async function carregarDadosProfissional(id) {
         document.getElementById('ativo').value = profissional.ativo ? '1' : '0';
     } catch (err) {
         console.error('Erro ao carregar dados do profissional:', err);
-        alert('Erro ao carregar dados do profissional.');
+        showToast('Erro ao carregar dados do profissional.', 'error');
     }
 }
 
@@ -44,17 +42,25 @@ async function salvarProfissional(e) {
         ativo: parseInt(document.getElementById('ativo').value) === 1
     };
 
+    console.log('Payload enviado:', payload); // log para depuração
+
     try {
         if (profissionalId) {
-            // Edição: usa PUT /profissionais/{id}
+            // Edição
             await apiFetch(`/profissionais/${profissionalId}`, {
                 method: 'PUT',
                 body: JSON.stringify(payload)
             });
             showToast('Profissional atualizado com sucesso!', 'success');
         } else {
-            // Criação: inclui senha e usa POST /auth/registro/profissional
-            payload.senha = document.getElementById('senha').value;
+            // Criação - adiciona senha
+            const senha = document.getElementById('senha').value;
+            if (!senha) {
+                showToast('Senha é obrigatória para novo profissional.', 'error');
+                return;
+            }
+            payload.senha = senha;
+            console.log('Enviando para /auth/registro/profissional com payload:', payload);
             await apiFetch('/auth/registro/profissional', {
                 method: 'POST',
                 body: JSON.stringify(payload)
@@ -63,6 +69,7 @@ async function salvarProfissional(e) {
         }
         window.location.href = '/admin/professionals';
     } catch (err) {
+        console.error('Erro ao salvar profissional:', err);
         showToast('Erro ao salvar profissional: ' + err.message, 'error');
     }
 }
